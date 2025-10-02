@@ -15,44 +15,6 @@
             font-family: 'Inter', sans-serif;
         }
     </style>
-</head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 flex items-center justify-center min-h-screen p-4">
-
-    <div class="w-full max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Upcoming Calendar Events</h1>
-                <p class="text-gray-500 dark:text-gray-400 mt-1">A simple client-side Google Calendar API integration.</p>
-            </div>
-            <div class="flex space-x-2 mt-4 md:mt-0">
-                <button id="authorize_button" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
-                    Authorize
-                </button>
-                <button id="signout_button" class="hidden bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
-                    Sign Out
-                </button>
-            </div>
-        </div>
-
-        <!-- Instructions Section -->
-        <div id="instructions" class="mb-6 p-4 bg-yellow-100 dark:bg-gray-700 border-l-4 border-yellow-500 dark:border-yellow-400 rounded-r-lg">
-            <h3 class="font-bold text-yellow-800 dark:text-yellow-300">Action Required</h3>
-            <p class="text-sm text-yellow-700 dark:text-yellow-200 mt-1">
-                To use this, you must get an <strong>API Key</strong> and <strong>OAuth 2.0 Client ID</strong> from the <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer" class="underline hover:text-yellow-500">Google Cloud Console</a>.
-                Make sure to enable the "Google Calendar API" and configure your OAuth consent screen with the correct authorized JavaScript origins. Then, paste your credentials into the script below.
-            </p>
-        </div>
-        
-        <!-- Events list container -->
-        <div id="events_container" class="space-y-4">
-            <p id="status_message" class="text-center text-gray-500 dark:text-gray-400 py-8">Please authorize to see your upcoming events.</p>
-        </div>
-    </div>
-
-    <!-- Google API Client and Identity Services Scripts -->
-    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
-
     <script type="text/javascript">
         /*
          * =========================================================================
@@ -74,14 +36,22 @@
         let gapiInited = false;
         let gisInited = false;
 
-        const authorizeButton = document.getElementById('authorize_button');
-        const signoutButton = document.getElementById('signout_button');
-        const eventsContainer = document.getElementById('events_container');
-        const statusMessage = document.getElementById('status_message');
-        const instructions = document.getElementById('instructions');
+        // We will get references to the buttons after the DOM has loaded.
+        let authorizeButton;
+        let signoutButton;
+        let eventsContainer;
+        let instructions;
 
-        authorizeButton.onclick = handleAuthClick;
-        signoutButton.onclick = handleSignoutClick;
+        document.addEventListener('DOMContentLoaded', () => {
+            authorizeButton = document.getElementById('authorize_button');
+            signoutButton = document.getElementById('signout_button');
+            eventsContainer = document.getElementById('events_container');
+            instructions = document.getElementById('instructions');
+
+            authorizeButton.onclick = handleAuthClick;
+            signoutButton.onclick = handleSignoutClick;
+        });
+
 
         /**
          * Callback after api.js is loaded.
@@ -120,7 +90,7 @@
          * Enables user interaction after all libraries are loaded.
          */
         function maybeEnableButtons() {
-            if (gapiInited && gisInited) {
+            if (gapiInited && gisInited && authorizeButton) {
                 authorizeButton.disabled = false;
             }
         }
@@ -264,7 +234,45 @@
             
             return `${startTimeString} - ${endTimeString}`;
         }
-
     </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Upcoming Calendar Events</h1>
+                <p class="text-gray-500 dark:text-gray-400 mt-1">A simple client-side Google Calendar API integration.</p>
+            </div>
+            <div class="flex space-x-2 mt-4 md:mt-0">
+                <button id="authorize_button" disabled class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    Authorize
+                </button>
+                <button id="signout_button" class="hidden bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                    Sign Out
+                </button>
+            </div>
+        </div>
+
+        <!-- Instructions Section -->
+        <div id="instructions" class="mb-6 p-4 bg-yellow-100 dark:bg-gray-700 border-l-4 border-yellow-500 dark:border-yellow-400 rounded-r-lg">
+            <h3 class="font-bold text-yellow-800 dark:text-yellow-300">Action Required</h3>
+            <p class="text-sm text-yellow-700 dark:text-yellow-200 mt-1">
+                To use this, you must get an <strong>API Key</strong> and <strong>OAuth 2.0 Client ID</strong> from the <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer" class="underline hover:text-yellow-500">Google Cloud Console</a>.
+                Make sure to enable the "Google Calendar API" and configure your OAuth consent screen with the correct authorized JavaScript origins. Then, paste your credentials into the script below.
+            </p>
+        </div>
+        
+        <!-- Events list container -->
+        <div id="events_container" class="space-y-4">
+            <p id="status_message" class="text-center text-gray-500 dark:text-gray-400 py-8">Please authorize to see your upcoming events.</p>
+        </div>
+    </div>
+
+    <!-- Google API Client and Identity Services Scripts -->
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+
 </body>
 </html>
+
