@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Roboto+Mono:wght@400;700&family=Playfair+Display:wght@700&display=swap');
@@ -24,7 +25,7 @@
     --primary: #38bdf8; --primary-light: #1e293b; --primary-dark: #7dd3fc;
     --bg: #020617; --card: #0f172a; --text: #e2e8f0; --muted: #94a3b8;
     --border-color: #334155; --input-bg: #1e293b;
-    --link-text-color: #7dd3fc; /* FIXED: Added for dark mode readability */
+    --link-text-color: #7dd3fc;
     }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
@@ -87,7 +88,7 @@
     transition: border-color 0.3s, box-shadow 0.3s;
     }
     textarea { resize: vertical; min-height: 80px; }
-    input[type="color"] { width: 100%; height: 44px; padding: 0; border: none; background: transparent; cursor: pointer; }
+    input[type="color"] { width: 100%; height: 44px; padding: 0; border: none; background: transparent; cursor: pointer; border-radius: 8px; border: 1px solid var(--border-color); }
     input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); border-color: var(--primary); }
     .btn {
     background: var(--primary); color: white; border: none; padding: 12px 18px;
@@ -259,7 +260,7 @@
     .unlocked-feature {
       background-color: var(--input-bg); padding: 10px;
       border-radius: 8px; margin-bottom: 10px; font-weight: 500;
-      animation: feature-reveal 0.5s ease-out; /* FIXED: Corrected animation property */
+      animation: feature-reveal 0.5s ease-out;
       animation-fill-mode: backwards;
     }
     .country-stat-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color); }
@@ -326,8 +327,7 @@
     <script type="importmap">
     {
       "imports": {
-        "@google/genai": "https://esm.run/@google/genai",
-        "qrcode": "https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.mjs"
+        "@google/genai": "https://aistudiocdn.com/@google/genai@^1.22.0"
       }
     }
     </script>
@@ -389,9 +389,6 @@
         <h2>Weekly Availability</h2>
         <div id="calendar-timetable">
             <p class="muted">Connect Google Calendar to see your schedule here.</p>
-        </div>
-        <div id="gcal-backend-notice" class="hidden" style="background: var(--input-bg); padding: 10px; border-radius: 8px; margin-top: 15px;">
-            <p style="margin: 0; font-size: 0.9rem;"><strong>Note:</strong> Automatic calendar syncing requires a secure backend process (like a Cloud Function) to complete. For this demo, events won't appear here automatically after connecting. You can still use the "Analyze with Gemini AI" feature in Settings to manually update your status from your agenda.</p>
         </div>
     </div>
 
@@ -483,195 +480,221 @@
     </div>
     </div>
     <div id="settingsPage" class="page">
-    <div class="card">
-    <h2>Profile Settings</h2>
-    <div class="form-group">
-    <label for="display-name">Display Name</label>
-    <input type="text" id="display-name">
-    </div>
-    <div class="form-group">
-    <label for="themeSelect">Theme</label>
-    <select id="themeSelect">
-    <option value="auto">Auto (Day/Night)</option>
-    <option value="light">Light</option>
-    <option value="dark">Dark</option>
-    </select>
-    </div>
-    <div class="form-group" id="font-customization-field">
-    <label for="display-font">Display Name Font</label>
-    <select id="display-font">
-    <option value="Inter, sans-serif">Inter (Default)</option>
-    <option value="Poppins, sans-serif">Poppins</option>
-    <option value="Roboto Mono, monospace">Roboto Mono</option>
-    <option value="Playfair Display, serif">Playfair Display</option>
-    </select>
-    </div>
-    </div>
-    <div class="card">
-    <h2>Personal Info</h2>
-    <div class="form-group">
-    <label for="bio">Short Bio / Tagline</label>
-    <textarea id="bio" placeholder="A brief description of yourself."></textarea>
-    </div>
-    <div class="form-group">
-    <label for="birthday">Birthday</label>
-    <input type="date" id="birthday">
-    </div>
-    <div class="form-group">
-    <label for="country-search">Country</label>
-    <div class="country-select-wrapper">
-    <input type="text" id="country-search" placeholder="Search for a country...">
-    <div id="country-dropdown" class="country-dropdown hidden"></div>
-    </div>
-    <input type="hidden" id="country-code">
-    </div>
-    <div class="form-group">
-    <label for="phone-number">Public Phone Number</label>
-    <input type="tel" id="phone-number" placeholder="+1 (555) 123-4567">
-    </div>
-    <div class="form-group" id="scheduling-link-field">
-    <label for="scheduling-link">Scheduling Link (e.g., Calendly)</label>
-    <input type="url" id="scheduling-link" placeholder="https://calendly.com/yourname">
-    </div>
-    </div>
-    <div class="card">
-    <h2>Visual Customization</h2>
-    <div class="form-group" id="pfp-url-group">
-    <label for="pfp-url">Profile Picture URL</label>
-    <input type="url" id="pfp-url" placeholder="https://example.com/image.png">
-    </div>
-    <div class="form-group" id="accent-color-field">
-    <label for="accent-color">Profile Accent Color</label>
-    <input type="color" id="accent-color" value="#0ea5e9">
-    </div>
-    <div class="form-group" id="link-text-color-field">
-    <label for="link-text-color">Custom Link Text Color</label>
-    <input type="color" id="link-text-color" value="#0369a1">
-    </div>
-    </div>
-    
-    <div class="card">
-    <h2>Update Status</h2>
-    <p class="muted">This status will be updated automatically if you connect your Google Calendar.</p>
-    <div class="form-group">
-    <label for="status-emoji">Current Status</label>
-    <select id="status-emoji">
-    <option value="🟢">🟢 Available</option>
-    <option value="💻">💻 Busy</option>
-    <option value="🧠">🧠 Deep Work</option>
-    <option value="🚗">🚗 Commuting</option>
-    <option value="☕">☕ On a Break</option>
-    <option value="🔴">🔴 Do Not Disturb</option>
-    <option value="📚">📚 School/Study</option>
-    <option value="🏖️">🏖️ Vacation/OOO</option>
-    <option value="😴">😴 Offline/Sleeping</option>
-    <option value="🍽️">🍽️ Meal Time</option>
-    <option value="🏋️">🏋️ Working Out</option>
-    <option value="🎮">🎮 Gaming</option>
-    <option value="✈️">✈️ Traveling</option>
-    </select>
-    </div>
-    <div class="form-group">
-    <label for="status-message">Message</label>
-    <input type="text" id="status-message" placeholder="e.g., Drafting 2026 Strategy">
-    </div>
-    </div>
-
-    <div class="card hidden" id="integrations-card">
-        <h2>Integrations</h2>
-        <p>Connect your HAP to other services for automatic status updates.</p>
-        <div id="gcal-integration-section">
-            <button id="connect-gcal-btn" class="btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M10.875 7.75a.75.75 0 0 0-1.5 0v1.5h-1.5a.75.75 0 0 0 0 1.5h1.5v1.5a.75.75 0 0 0 1.5 0v-1.5h1.5a.75.75 0 0 0 0-1.5h-1.5v-1.5Z"/><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM1.5 8a6.5 6.5 0 1 1 13 0 6.5 6.5 0 0 1-13 0Z"/></svg>
-                <span class="btn-text">Connect Google Calendar</span>
-            </button>
-            <button id="disconnect-gcal-btn" class="btn secondary hidden" style="background-color: #ef4444; color: white;">
-                <span class="btn-text">Disconnect Google Calendar</span>
-            </button>
-            <p id="gcal-status-text" class="muted" style="margin-top: 15px;"></p>
+        <div class="card">
+            <h2>Profile Settings</h2>
+            <div class="form-group">
+                <label for="display-name">Display Name</label>
+                <input type="text" id="display-name">
+            </div>
+            <div class="form-group">
+                <label for="themeSelect">Appearance</label>
+                <select id="themeSelect">
+                    <option value="auto">Auto (Day/Night)</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
         </div>
-        <div id="gcal-customization-fields" class="hidden" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;">
-            <h3>Calendar Sync Settings</h3>
+
+        <div class="card">
+            <h2>Personal Info</h2>
             <div class="form-group">
-                <label for="gcal-busy-status">When an event makes you 'Busy', set status to:</label>
-                <select id="gcal-busy-status"></select>
+                <label for="bio">Short Bio / Tagline</label>
+                <textarea id="bio" placeholder="A brief description of yourself."></textarea>
             </div>
             <div class="form-group">
-                <label for="gcal-free-status">During 'Free' time, set status to:</label>
-                <select id="gcal-free-status"></select>
+                <label for="birthday">Birthday</label>
+                <input type="date" id="birthday">
             </div>
-            <div id="gemini-ai-sync-section" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;">
-                <h3>✨ AI-Powered Status Sync</h3>
-                <p class="muted">Paste your calendar agenda for today below. The AI will analyze it to determine your current status, stripping any private details.</p>
-                <div class="form-group">
-                    <label for="calendar-input-for-ai">Today's Calendar Events</label>
-                    <textarea id="calendar-input-for-ai" placeholder="e.g., 9:00 AM - 10:00 AM: Project Phoenix sync with Alice\n12:30 PM - 1:00 PM: Lunch at Mom's place" style="min-height: 120px;"></textarea>
+            <div class="form-group">
+                <label for="country-search">Country</label>
+                <div class="country-select-wrapper">
+                    <input type="text" id="country-search" placeholder="Search for a country...">
+                    <div id="country-dropdown" class="country-dropdown hidden"></div>
                 </div>
-                <button id="gemini-sync-btn" class="btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5z"/></svg>
-                    <span class="btn-text">Analyze with Gemini AI & Update Status</span>
-                </button>
+                <input type="hidden" id="country-code">
+            </div>
+            <div class="form-group">
+                <label for="phone-number">Public Phone Number</label>
+                <input type="tel" id="phone-number" placeholder="+1 (555) 123-4567">
+            </div>
+            <div class="form-group" id="scheduling-link-field">
+                <label for="scheduling-link">Scheduling Link (e.g., Calendly)</label>
+                <input type="url" id="scheduling-link" placeholder="https://calendly.com/yourname">
             </div>
         </div>
-    </div>
 
-    <div class="card">
-    <h2>Custom Links</h2>
-    <div id="custom-links-container"></div>
-    </div>
-    <div class="card">
-    <h2>Verification</h2>
-    <div id="verification-section"></div>
-    </div>
-    <div class="card hidden" id="custom-ads-settings-card">
-        <h2>Promotional Blocks 📢</h2>
-        <p class="muted">As a Pro tier member or higher, you can display your own custom content on your public profile.</p>
-        <div class="form-group">
-            <label for="ads-enabled-toggle">Display Custom Blocks</label>
-            <select id="ads-enabled-toggle">
-            <option value="false">Disabled</option>
-            <option value="true">Enabled</option>
-            </select>
+        <div class="card">
+            <h2>Visual Customization</h2>
+            <div class="form-group" id="pfp-url-group">
+                <label for="pfp-url">Profile Picture URL</label>
+                <input type="url" id="pfp-url" placeholder="https://example.com/image.png">
+            </div>
+            <div class="form-group" id="font-customization-field">
+                <label for="display-font">Display Name Font</label>
+                <select id="display-font">
+                    <option value="Inter, sans-serif">Inter (Default)</option>
+                    <option value="Poppins, sans-serif">Poppins</option>
+                    <option value="Roboto Mono, monospace">Roboto Mono</option>
+                    <option value="Playfair Display, serif">Playfair Display</option>
+                </select>
+            </div>
+
+            <div id="theme-customization-container" class="hidden" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <div class="form-group">
+                    <label>Preset Themes</label>
+                    <div id="preset-themes-container" class="flex flex-wrap gap-2">
+                        <!-- Preset buttons will be injected here -->
+                    </div>
+                </div>
+                <div id="ai-theme-generator" class="hidden" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                    <h4 class="text-lg font-semibold">✨ AI Theme Generator</h4>
+                    <p class="muted">Describe a theme you'd like to see. e.g., "a calm forest at dusk" or "cyberpunk neon city".</p>
+                    <div class="form-group mt-4">
+                        <input type="text" id="ai-theme-prompt" placeholder="Describe your theme...">
+                    </div>
+                    <button id="generate-ai-theme-btn" class="btn secondary flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 2a1 1 0 00-1 1v1.586A2.5 2.5 0 002.5 6v8a2.5 2.5 0 001.5 2.414V18a1 1 0 001 1h1a1 1 0 001-1v-1.586A2.5 2.5 0 008.5 14V6A2.5 2.5 0 007 3.586V3a1 1 0 00-1-1H5zM15 2a1 1 0 00-1 1v1.586A2.5 2.5 0 0012.5 6v8a2.5 2.5 0 001.5 2.414V18a1 1 0 001 1h1a1 1 0 001-1v-1.586A2.5 2.5 0 0018.5 14V6a2.5 2.5 0 00-1.5-2.414V3a1 1 0 00-1-1h-1z" clip-rule="evenodd" /></svg>
+                        <span class="btn-text">Generate with AI</span>
+                    </button>
+                </div>
+                <div id="fine-tune-colors-section" class="hidden" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                    <h4 class="text-lg font-semibold">🎨 Ultra Customization: Fine-Tune Colors</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                        <div class="form-group"><label for="theme-color-primary">Primary</label><input type="color" id="theme-color-primary"></div>
+                        <div class="form-group"><label for="theme-color-bg">Background</label><input type="color" id="theme-color-bg"></div>
+                        <div class="form-group"><label for="theme-color-card">Card</label><input type="color" id="theme-color-card"></div>
+                        <div class="form-group"><label for="theme-color-text">Text</label><input type="color" id="theme-color-text"></div>
+                        <div class="form-group"><label for="theme-color-muted">Muted Text</label><input type="color" id="theme-color-muted"></div>
+                        <div class="form-group"><label for="theme-color-link">Link Text</label><input type="color" id="theme-color-link"></div>
+                    </div>
+                    <button id="reset-theme-btn" class="btn secondary" style="margin-top: 10px; width: auto;"><span class="btn-text">Reset to Default</span></button>
+                </div>
+            </div>
         </div>
-        <div id="ad-customization-fields" class="hidden">
-            <h3 style="margin-top: 30px;">Top Block (Image Banner)</h3>
+
+        <div class="card">
+            <h2>Update Status</h2>
+            <p class="muted">This status will be updated automatically if you connect your Google Calendar.</p>
             <div class="form-group">
-            <label for="top-ad-image-url">Image URL</label>
-            <input type="url" id="top-ad-image-url" placeholder="https://example.com/banner.png">
+                <label for="status-emoji">Current Status</label>
+                <select id="status-emoji">
+                    <option value="🟢">🟢 Available</option>
+                    <option value="💻">💻 Busy</option>
+                    <option value="🧠">🧠 Deep Work</option>
+                    <option value="🚗">🚗 Commuting</option>
+                    <option value="☕">☕ On a Break</option>
+                    <option value="🔴">🔴 Do Not Disturb</option>
+                    <option value="📚">📚 School/Study</option>
+                    <option value="🏖️">🏖️ Vacation/OOO</option>
+                    <option value="😴">😴 Offline/Sleeping</option>
+                    <option value="🍽️">🍽️ Meal Time</option>
+                    <option value="🏋️">🏋️ Working Out</option>
+                    <option value="🎮">🎮 Gaming</option>
+                    <option value="✈️">✈️ Traveling</option>
+                </select>
             </div>
             <div class="form-group">
-            <label for="top-ad-link-url">Target URL (when banner is clicked)</label>
-            <input type="url" id="top-ad-link-url" placeholder="https://your-project.com">
-            </div>
-            <h3 style="margin-top: 30px;">Bottom Block (Text)</h3>
-            <div class="form-group">
-            <label for="bottom-ad-text">Text Content</label>
-            <input type="text" id="bottom-ad-text" placeholder="Check out my new project!">
-            </div>
-            <div class="form-group">
-            <label for="bottom-ad-link-url">Target URL (when text is clicked)</label>
-            <input type="url" id="bottom-ad-link-url" placeholder="https://your-other-project.com">
+                <label for="status-message">Message</label>
+                <input type="text" id="status-message" placeholder="e.g., Drafting 2026 Strategy">
             </div>
         </div>
-    </div>
-    <div class="card hidden" id="platform-ad-settings-card">
-        <h2>Platform Ad Settings</h2>
-        <p class="muted">As a Max tier user, you can control the visibility of the default 'Join HAP' promotion on your profile.</p>
-        <div class="form-group">
-            <label for="platform-ad-toggle">"Join HAP" Promotion</label>
-            <select id="platform-ad-toggle">
-                <option value="off">Disabled</option>
-                <option value="top">Show at Top</option>
-                <option value="bottom">Show at Bottom</option>
-                <option value="both">Show at Top & Bottom</option>
-            </select>
+
+        <div class="card hidden" id="integrations-card">
+            <h2>Integrations</h2>
+            <p>Connect your HAP to other services for automatic status updates.</p>
+            <div id="gcal-integration-section">
+                <button id="connect-gcal-btn" class="btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M10.875 7.75a.75.75 0 0 0-1.5 0v1.5h-1.5a.75.75 0 0 0 0 1.5h1.5v1.5a.75.75 0 0 0 1.5 0v-1.5h1.5a.75.75 0 0 0 0-1.5h-1.5v-1.5Z"/><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM1.5 8a6.5 6.5 0 1 1 13 0 6.5 6.5 0 0 1-13 0Z"/></svg>
+                    <span class="btn-text">Connect Google Calendar</span>
+                </button>
+                <button id="disconnect-gcal-btn" class="btn secondary hidden" style="background-color: #ef4444; color: white;">
+                    <span class="btn-text">Disconnect Google Calendar</span>
+                </button>
+                <p id="gcal-status-text" class="muted" style="margin-top: 15px;"></p>
+            </div>
+            <div id="gcal-customization-fields" class="hidden" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <h3>Calendar Sync Settings</h3>
+                <div class="form-group">
+                    <label for="gcal-busy-status">When an event makes you 'Busy', set status to:</label>
+                    <select id="gcal-busy-status"></select>
+                </div>
+                <div class="form-group">
+                    <label for="gcal-free-status">During 'Free' time, set status to:</label>
+                    <select id="gcal-free-status"></select>
+                </div>
+                <div id="gemini-ai-sync-section" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                    <h3>✨ AI-Powered Status Sync</h3>
+                    <p class="muted">Paste your calendar agenda for today below. The AI will analyze it to determine your current status, stripping any private details.</p>
+                    <div class="form-group">
+                        <label for="calendar-input-for-ai">Today's Calendar Events</label>
+                        <textarea id="calendar-input-for-ai" placeholder="e.g., 9:00 AM - 10:00 AM: Project Phoenix sync with Alice\n12:30 PM - 1:00 PM: Lunch at Mom's place" style="min-height: 120px;"></textarea>
+                    </div>
+                    <button id="gemini-sync-btn" class="btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5z"/></svg>
+                        <span class="btn-text">Analyze with Gemini AI & Update Status</span>
+                    </button>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="card">
-    <button id="save-settings-btn" class="btn"><span class="btn-text">Save All Changes</span></button>
-    <button id="logout-btn" class="btn secondary" style="margin-top: 12px;"><span class="btn-text">Logout</span></button>
-    <button id="delete-account-btn" class="btn" style="margin-top: 20px; background-color: #ef4444; color: white;"><span class="btn-text">Delete My Account Permanently</span></button>
-    </div>
+
+        <div class="card">
+            <h2>Custom Links</h2>
+            <div id="custom-links-container"></div>
+        </div>
+        <div class="card">
+            <h2>Verification</h2>
+            <div id="verification-section"></div>
+        </div>
+        <div class="card hidden" id="custom-ads-settings-card">
+            <h2>Promotional Blocks 📢</h2>
+            <p class="muted">As a Pro tier member or higher, you can display your own custom content on your public profile.</p>
+            <div class="form-group">
+                <label for="ads-enabled-toggle">Display Custom Blocks</label>
+                <select id="ads-enabled-toggle">
+                <option value="false">Disabled</option>
+                <option value="true">Enabled</option>
+                </select>
+            </div>
+            <div id="ad-customization-fields" class="hidden">
+                <h3 style="margin-top: 30px;">Top Block (Image Banner)</h3>
+                <div class="form-group">
+                <label for="top-ad-image-url">Image URL</label>
+                <input type="url" id="top-ad-image-url" placeholder="https://example.com/banner.png">
+                </div>
+                <div class="form-group">
+                <label for="top-ad-link-url">Target URL (when banner is clicked)</label>
+                <input type="url" id="top-ad-link-url" placeholder="https://your-project.com">
+                </div>
+                <h3 style="margin-top: 30px;">Bottom Block (Text)</h3>
+                <div class="form-group">
+                <label for="bottom-ad-text">Text Content</label>
+                <input type="text" id="bottom-ad-text" placeholder="Check out my new project!">
+                </div>
+                <div class="form-group">
+                <label for="bottom-ad-link-url">Target URL (when text is clicked)</label>
+                <input type="url" id="bottom-ad-link-url" placeholder="https://your-other-project.com">
+                </div>
+            </div>
+        </div>
+        <div class="card hidden" id="platform-ad-settings-card">
+            <h2>Platform Ad Settings</h2>
+            <p class="muted">As a Max tier user, you can control the visibility of the default 'Join HAP' promotion on your profile.</p>
+            <div class="form-group">
+                <label for="platform-ad-toggle">"Join HAP" Promotion</label>
+                <select id="platform-ad-toggle">
+                    <option value="off">Disabled</option>
+                    <option value="top">Show at Top</option>
+                    <option value="bottom">Show at Bottom</option>
+                    <option value="both">Show at Top & Bottom</option>
+                </select>
+            </div>
+        </div>
+        <div class="card">
+            <button id="save-settings-btn" class="btn"><span class="btn-text">Save All Changes</span></button>
+            <button id="logout-btn" class="btn secondary" style="margin-top: 12px;"><span class="btn-text">Logout</span></button>
+            <button id="delete-account-btn" class="btn" style="margin-top: 20px; background-color: #ef4444; color: white;"><span class="btn-text">Delete My Account Permanently</span></button>
+        </div>
     </div>
     </div>
     <footer>
@@ -721,7 +744,6 @@
     onValue
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
     import { GoogleGenAI, Type } from "@google/genai";
-    import QRCode from 'qrcode';
 
     // --- PASTE YOUR FIREBASE CONFIGURATION HERE ---
     const firebaseConfig = {
@@ -774,29 +796,29 @@
     
     const USER_TIER_CONFIG = {
       'Member': { 
-        name: 'Basic', linkLimit: 1, pfp: false, qrCode: false, customFont: false, customColor: false, 
+        name: 'Basic', linkLimit: 1, pfp: false, qrCode: false, customFont: false, 
         scheduling: false, analytics: 'limited', verification: false, gcalIntegration: false,
-        canCustomizeAds: false, canControlPlatformAd: false
+        canCustomizeAds: false, canControlPlatformAd: false, canUsePresetThemes: false, canUseAiThemes: false, canFineTuneThemes: false
       },
       'Plus': { 
-        name: 'Personal', linkLimit: 3, pfp: true, qrCode: true, customFont: true, customColor: true, 
+        name: 'Personal', linkLimit: 3, pfp: true, qrCode: true, customFont: true, 
         scheduling: false, analytics: true, verification: false, gcalIntegration: true,
-        canCustomizeAds: false, canControlPlatformAd: false
+        canCustomizeAds: false, canControlPlatformAd: false, canUsePresetThemes: true, canUseAiThemes: false, canFineTuneThemes: false
       },
       'Pro': { 
-        name: 'Professional', linkLimit: 5, pfp: true, qrCode: true, customFont: true, customColor: true, 
+        name: 'Professional', linkLimit: 5, pfp: true, qrCode: true, customFont: true, 
         scheduling: false, analytics: true, verification: true, gcalIntegration: true,
-        canCustomizeAds: true, canControlPlatformAd: false
+        canCustomizeAds: true, canControlPlatformAd: false, canUsePresetThemes: true, canUseAiThemes: true, canFineTuneThemes: false
       },
       'Max': { 
-        name: 'Power User', linkLimit: 10, pfp: true, qrCode: true, customFont: true, customColor: true, 
+        name: 'Power User', linkLimit: 10, pfp: true, qrCode: true, customFont: true, 
         scheduling: true, analytics: true, verification: true, gcalIntegration: true,
-        canCustomizeAds: true, canControlPlatformAd: true 
+        canCustomizeAds: true, canControlPlatformAd: true, canUsePresetThemes: true, canUseAiThemes: true, canFineTuneThemes: true
       },
       'Owner': {
-        name: 'Owner', linkLimit: 10, pfp: true, qrCode: true, customFont: true, customColor: true, 
+        name: 'Owner', linkLimit: 10, pfp: true, qrCode: true, customFont: true, 
         scheduling: true, analytics: true, verification: true, gcalIntegration: true,
-        canCustomizeAds: true, canControlPlatformAd: true
+        canCustomizeAds: true, canControlPlatformAd: true, canUsePresetThemes: true, canUseAiThemes: true, canFineTuneThemes: true
       },
     };
     
@@ -826,13 +848,25 @@
         pfp: "Custom Profile Picture",
         qrCode: "Profile QR Code Sharing",
         customFont: "Custom Profile Font",
-        customColor: "Custom Profile Colors",
         scheduling: "Scheduling Link Display",
         analytics: "Profile Analytics",
         verification: "Verification Eligibility",
         canCustomizeAds: "Custom Promotional Blocks",
         canControlPlatformAd: "Platform Ad Controls",
-        gcalIntegration: "Google Calendar Sync"
+        gcalIntegration: "Google Calendar Sync",
+        canUsePresetThemes: "Preset Profile Themes",
+        canUseAiThemes: "AI-Powered Theme Generation",
+        canFineTuneThemes: "Full Theme Color Control"
+    };
+
+    const PREDEFINED_THEMES = {
+        'Sky': { name: 'Sky', primary: '#0ea5e9', bg: '#f8fafc', card: '#ffffff', text: '#0f172a', muted: '#64748b', link: '#0369a1' },
+        'Dusk': { name: 'Dusk', primary: '#f59e0b', bg: '#111827', card: '#1f2937', text: '#f9fafb', muted: '#9ca3af', link: '#fcd34d' },
+        'Mint': { name: 'Mint', primary: '#10b981', bg: '#f0fdfa', card: '#ffffff', text: '#064e3b', muted: '#34d399', link: '#047857' },
+        'Rose': { name: 'Rose', primary: '#f43f5e', bg: '#fff1f2', card: '#ffffff', text: '#881337', muted: '#fb7185', link: '#be123c' },
+        'Solaris': { name: 'Solaris', primary: '#f97316', bg: '#18181b', card: '#27272a', text: '#f4f4f5', muted: '#a1a1aa', link: '#fbbf24' },
+        'Oceanic': { name: 'Oceanic', primary: '#0891b2', bg: '#f0f9ff', card: '#ffffff', text: '#0c4a6e', muted: '#38bdf8', link: '#075985' },
+        'Graphite': { name: 'Graphite', primary: '#64748b', bg: '#f1f5f9', card: '#ffffff', text: '#1e293b', muted: '#475569', link: '#0f172a' }
     };
     
     const VERIFICATION_QUESTIONS = [
@@ -1130,12 +1164,6 @@
     }
     
     async function hashChangeRouter() {
-        if (Object.keys(App.elements).length === 0) {
-            App.pages.forEach(pId => App.elements[pId] = document.getElementById(pId));
-            App.elements.mainHeader = document.getElementById('mainHeader');
-            App.elements.toast = document.getElementById('toast');
-        }
-
         clearInterval(countdownInterval);
         if(publicViewInterval) clearInterval(publicViewInterval);
         if(timetableListener) timetableListener(); // Detach old listener
@@ -1207,16 +1235,29 @@
     
     function applyVisuals(userData) {
         if (!userData) return;
+
+        const themeVars = ['--primary', '--primary-light', '--primary-dark', '--bg', '--card', '--text', '--muted', '--border-color', '--input-bg', '--link-text-color', '--display-font'];
+        themeVars.forEach(v => document.documentElement.style.removeProperty(v));
+        
         const theme = userData.theme || 'auto';
         const timeData = getLocalTimeData();
         const isNight = timeData.hour >= 20 || timeData.hour < 6;
         document.body.className = (theme === 'dark' || (theme === 'auto' && isNight)) ? 'dark' : '';
+        
+        if(userData.customTheme) {
+            document.documentElement.style.setProperty('--primary', userData.customTheme.primary);
+            document.documentElement.style.setProperty('--bg', userData.customTheme.bg);
+            document.documentElement.style.setProperty('--card', userData.customTheme.card);
+            document.documentElement.style.setProperty('--text', userData.customTheme.text);
+            document.documentElement.style.setProperty('--muted', userData.customTheme.muted);
+            document.documentElement.style.setProperty('--link-text-color', userData.customTheme.link);
+            document.documentElement.style.setProperty('--border-color', userData.customTheme.card);
+            document.documentElement.style.setProperty('--input-bg', userData.customTheme.bg);
+        }
 
-        const accent = userData?.profileAccentColor || '#0ea5e9';
-        document.documentElement.style.setProperty('--primary', accent);
-        document.documentElement.style.setProperty('--primary-dark', document.body.classList.contains('dark') ? '#7dd3fc' : '#0369a1');
-        document.documentElement.style.setProperty('--link-text-color', userData?.linkTextColor || '#0369a1');
-        document.documentElement.style.setProperty('--display-font', userData?.displayNameFont || 'Inter, sans-serif');
+        if (userData.displayNameFont) {
+            document.documentElement.style.setProperty('--display-font', userData.displayNameFont);
+        }
 
         const pfpElement = document.getElementById('profile-pfp');
         if (pfpElement) {
@@ -1229,8 +1270,6 @@
                 pfpElement.removeAttribute('data-src');
                 pfpElement.textContent = userData.pfpText || userData.displayName.charAt(0).toUpperCase();
             }
-            pfpElement.style.backgroundColor = isNight ? '#1e293b' : 'var(--primary-light)';
-            pfpElement.style.borderColor = accent;
         }
     }
     
@@ -1394,8 +1433,6 @@
         document.getElementById('themeSelect').value = data.theme || 'auto';
         document.getElementById('pfp-url').value = data.pfpUrl || '';
         document.getElementById('display-font').value = data.displayNameFont || 'Inter, sans-serif';
-        document.getElementById('accent-color').value = data.profileAccentColor || '#0ea5e9';
-        document.getElementById('link-text-color').value = data.linkTextColor || '#0369a1';
         document.getElementById('scheduling-link').value = data.schedulingLink || '';
         document.getElementById('bio').value = data.bio || '';
         document.getElementById('birthday').value = data.birthday || '';
@@ -1410,9 +1447,31 @@
         document.getElementById('pfp-url-group').classList.toggle('hidden', !tierConfig.pfp);
         document.getElementById('font-customization-field').classList.toggle('hidden', !tierConfig.customFont);
         document.getElementById('scheduling-link-field').classList.toggle('hidden', !tierConfig.scheduling);
-        document.getElementById('accent-color-field').classList.toggle('hidden', !tierConfig.customColor);
-        document.getElementById('link-text-color-field').classList.toggle('hidden', !tierConfig.customColor);
         
+        const themeContainer = document.getElementById('theme-customization-container');
+        themeContainer.classList.toggle('hidden', !tierConfig.canUsePresetThemes);
+        if (tierConfig.canUsePresetThemes) {
+            document.getElementById('ai-theme-generator').classList.toggle('hidden', !tierConfig.canUseAiThemes);
+            document.getElementById('fine-tune-colors-section').classList.toggle('hidden', !tierConfig.canFineTuneThemes);
+
+            const presetsEl = document.getElementById('preset-themes-container');
+            presetsEl.innerHTML = Object.values(PREDEFINED_THEMES).map(theme => 
+                `<button type="button" class="preset-theme-btn flex flex-col items-center p-2 rounded-lg border-2 border-transparent hover:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" data-theme-name="${theme.name}">
+                    <div class="w-16 h-10 rounded-md flex overflow-hidden shadow-md">
+                        <div class="w-1/3 h-full" style="background-color: ${theme.primary};"></div>
+                        <div class="w-2/3 h-full flex flex-col">
+                            <div class="h-1/2 w-full" style="background-color: ${theme.card};"></div>
+                            <div class="h-1/2 w-full" style="background-color: ${theme.bg};"></div>
+                        </div>
+                    </div>
+                    <span class="text-xs font-medium mt-1 text-[var(--muted)]">${theme.name}</span>
+                </button>`
+            ).join('');
+            
+            const currentTheme = data.customTheme || PREDEFINED_THEMES['Sky'];
+            applyThemeToPickers(currentTheme);
+        }
+
         const linksContainer = document.getElementById('custom-links-container');
         linksContainer.innerHTML = '';
         const linkLimit = tierConfig.linkLimit;
@@ -1472,6 +1531,9 @@
     }
     
     function handlePageLoad() {
+        App.pages.forEach(pId => App.elements[pId] = document.getElementById(pId));
+        App.elements.mainHeader = document.getElementById('mainHeader');
+        App.elements.toast = document.getElementById('toast');
         window.addEventListener('hashchange', hashChangeRouter);
         addEventListeners();
         handleOAuthCallback();
@@ -1539,8 +1601,6 @@
             theme: document.getElementById('themeSelect').value,
             pfpUrl: document.getElementById('pfp-url').value,
             displayNameFont: document.getElementById('display-font').value,
-            profileAccentColor: document.getElementById('accent-color').value, 
-            linkTextColor: document.getElementById('link-text-color').value,
             schedulingLink: document.getElementById('scheduling-link').value, 
             bio: document.getElementById('bio').value,
             birthday: document.getElementById('birthday').value,
@@ -1550,6 +1610,18 @@
             message: document.getElementById('status-message').value,
             links: customLinks
         };
+
+        if (tierConfig.canUsePresetThemes) {
+            dataToSave.customTheme = {
+                primary: document.getElementById('theme-color-primary').value,
+                bg: document.getElementById('theme-color-bg').value,
+                card: document.getElementById('theme-color-card').value,
+                text: document.getElementById('theme-color-text').value,
+                muted: document.getElementById('theme-color-muted').value,
+                link: document.getElementById('theme-color-link').value
+            };
+        }
+
         if(!dataToSave.pfpUrl) dataToSave.pfpText = App.currentProfileData.displayName.charAt(0).toUpperCase();
 
         if(tierConfig.gcalIntegration) {
@@ -1585,7 +1657,7 @@
         }
     }
     
-    async function handleGenerateQrCode() {
+    function handleGenerateQrCode() {
         const profileId = App.currentUser?.userId;
         if (!profileId) return;
 
@@ -1599,36 +1671,24 @@
         img.style.display = 'none';
 
         const shareUrl = `${window.location.origin}${window.location.pathname}?user=${profileId}`;
-        
-        try {
-            const isDarkTheme = document.body.classList.contains('dark');
-            const qrDarkColor = getComputedStyle(document.documentElement).getPropertyValue('--text').trim();
+        img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(shareUrl)}`;
 
-            const dataUrl = await QRCode.toDataURL(shareUrl, {
-                errorCorrectionLevel: 'H',
-                type: 'image/webp',
-                margin: 2,
-                width: 200,
-                color: {
-                    dark: qrDarkColor,
-                    light: '#00000000' // Transparent background
-                }
-            });
-
-            img.src = dataUrl;
+        img.onload = () => {
             img.style.display = 'block';
             showToast('QR Code generated! 🖼️');
             btn.querySelector('.btn-text').textContent = 'Re-generate QR Code';
-        } catch (err) {
-            console.error('QR Code generation failed:', err);
+            btn.disabled = false;
+            btn.classList.remove('btn-loading');
+        };
+        
+        img.onerror = () => {
             showToast('Failed to generate QR code.', 'error');
             placeholder.classList.remove('hidden');
             placeholder.textContent = 'Error generating QR. Please try again.';
             btn.querySelector('.btn-text').textContent = 'Generate QR Code';
-        } finally {
             btn.disabled = false;
             btn.classList.remove('btn-loading');
-        }
+        };
     }
     
     function handleShareStatus() {
@@ -1986,7 +2046,21 @@
             if (config.analytics === 'limited') analyticsText = 'Limited Analytics';
             else if (config.analytics === true) analyticsText = 'Full Profile Analytics';
             
-            allTiersHtml += `<div class="tier-plan-card"><h3><div class="membership-badge tier-${tierKey}">${config.name}</div></h3><ul><li>${config.linkLimit} Custom Link${config.linkLimit > 1 ? 's' : ''}</li><li>${config.gcalIntegration ? 'Google Calendar Sync' : 'No Calendar Sync'}</li><li>${config.pfp ? 'Custom Profile Picture' : 'Default Profile Picture'}</li><li>${config.qrCode ? 'Profile QR Code Sharing' : 'No QR Code Sharing'}</li><li>${config.customFont ? 'Custom Profile Font' : 'Standard Font'}</li><li>${config.customColor ? 'Custom Profile Colors' : 'Standard Colors'}</li><li>${config.scheduling ? 'Scheduling Link Display' : 'No Scheduling Link'}</li><li>${analyticsText}</li><li>${config.verification ? 'Verification Eligible' : 'Not Verification Eligible'}</li><li>${config.canCustomizeAds ? 'Custom Promo Blocks' : 'No Custom Blocks'}</li><li>${config.canControlPlatformAd ? 'Ad Controls' : 'Platform Ads On'}</li></ul></div>`;
+            allTiersHtml += `<div class="tier-plan-card">
+                <h3><div class="membership-badge tier-${tierKey}">${config.name}</div></h3>
+                <ul>
+                    <li>${config.linkLimit} Custom Link${config.linkLimit > 1 ? 's' : ''}</li>
+                    <li>${config.pfp ? 'Custom Profile Picture' : 'Default Profile Picture'}</li>
+                    <li>${config.customFont ? 'Custom Profile Font' : 'Standard Font'}</li>
+                    <li>${config.canUsePresetThemes ? 'Preset Themes' : 'No Custom Themes'}</li>
+                    <li>${config.canUseAiThemes ? 'AI Theme Generation' : 'No AI Themes'}</li>
+                    <li>${config.canFineTuneThemes ? 'Full Color Control' : 'No Fine-Tuning'}</li>
+                    <li>${analyticsText}</li>
+                    <li>${config.verification ? 'Verification Eligible' : 'Not Verification Eligible'}</li>
+                    <li>${config.canCustomizeAds ? 'Custom Promo Blocks' : 'No Custom Blocks'}</li>
+                    <li>${config.canControlPlatformAd ? 'Ad Controls' : 'Platform Ads On'}</li>
+                </ul>
+            </div>`;
         }
         allTiersHtml += '</div>';
         allTiersContainer.innerHTML = allTiersHtml;
@@ -2068,16 +2142,12 @@
             showToast('Finalizing calendar connection...', 'info');
 
             try {
-                // Store the auth code and set the user's token status to 'pending'
-                // A backend function would listen for this code to securely swap it for a refresh token
-                await update(ref(db, `users/${state}`), { googleRefreshToken: 'pending' });
                 await set(ref(db, `gcal_auth_codes/${state}`), code);
-                showToast('Calendar connected! A backend function is required to sync events. ✅', 'info');
+                showToast('Calendar connected! Your backend function will now sync. ✅', 'info');
                 
                 if(App.currentProfileData && App.currentProfileData.userId === state){
                     App.currentProfileData.googleRefreshToken = 'pending';
                     populateSettings(App.currentProfileData);
-                    renderTimetable(App.currentProfileData); // Re-render to show the new status
                 }
 
             } catch(error) {
@@ -2090,10 +2160,7 @@
     function renderTimetable(userData) {
         const card = document.getElementById('calendar-view-card');
         const container = document.getElementById('calendar-timetable');
-        const notice = document.getElementById('gcal-backend-notice');
         const tierConfig = USER_TIER_CONFIG[userData.membershipTier || 'Member'];
-
-        notice.classList.add('hidden'); // Reset notice visibility
 
         if (!tierConfig.gcalIntegration) {
             card.classList.add('hidden');
@@ -2102,15 +2169,9 @@
 
         card.classList.remove('hidden');
 
-        if (!userData.googleRefreshToken) {
+        if (!userData.googleRefreshToken || userData.googleRefreshToken === 'pending') {
             container.innerHTML = '<p class="muted">Connect your Google Calendar in settings to see your availability here.</p>';
             return;
-        }
-        
-        if (userData.googleRefreshToken === 'pending') {
-            container.innerHTML = `<p class="muted" style="text-align: center;"><strong>Connection In Progress</strong><br>A backend process is required to complete the sync.</p>`;
-            notice.classList.remove('hidden');
-            return; // Stop here, don't try to listen for events
         }
 
         const timetableRef = ref(db, `calendar_events/${userData.userId}`);
@@ -2153,8 +2214,30 @@
             container.innerHTML = '<p class="muted">Could not load availability data.</p>';
         });
     }
+
+    function applyThemeToPickers(theme) {
+        if(!theme) return;
+        document.getElementById('theme-color-primary').value = theme.primary || '#0ea5e9';
+        document.getElementById('theme-color-bg').value = theme.bg || '#f8fafc';
+        document.getElementById('theme-color-card').value = theme.card || '#ffffff';
+        document.getElementById('theme-color-text').value = theme.text || '#0f172a';
+        document.getElementById('theme-color-muted').value = theme.muted || '#64748b';
+        document.getElementById('theme-color-link').value = theme.link || '#0369a1';
+    }
+
+    function applyThemePreview(theme) {
+        if(!theme) return;
+        applyThemeToPickers(theme);
+        document.documentElement.style.setProperty('--primary', theme.primary);
+        document.documentElement.style.setProperty('--bg', theme.bg);
+        document.documentElement.style.setProperty('--card', theme.card);
+        document.documentElement.style.setProperty('--text', theme.text);
+        document.documentElement.style.setProperty('--muted', theme.muted);
+        document.documentElement.style.setProperty('--link-text-color', theme.link);
+        document.documentElement.style.setProperty('--border-color', theme.card);
+        document.documentElement.style.setProperty('--input-bg', theme.bg);
+    }
     
-    // NEW: Function to handle Gemini AI Sync
     async function handleGeminiAiSync() {
         const btn = document.getElementById('gemini-sync-btn');
         const calendarText = document.getElementById('calendar-input-for-ai').value.trim();
@@ -2199,7 +2282,6 @@
                                 description: 'The generated status message, cleared of PII.',
                             },
                         },
-                        required: ["status_emoji", "status_message"]
                     },
                 },
             });
@@ -2227,74 +2309,137 @@
             btn.classList.remove('btn-loading');
         }
     }
+    
+    async function handleGenerateAiTheme() {
+        const btn = document.getElementById('generate-ai-theme-btn');
+        const prompt = document.getElementById('ai-theme-prompt').value.trim();
+        if (!prompt) {
+            showToast("Please describe the theme you want.", "error");
+            return;
+        }
+        btn.classList.add('btn-loading');
+        
+        const systemInstruction = `You are a theme generator for a web application. Based on the user's prompt, generate a harmonious and accessible color palette. You MUST return a JSON object that strictly follows the provided schema. All colors must be valid 6-digit hex codes (e.g., '#RRGGBB'). Ensure good color contrast for accessibility, especially between 'text' and 'card', and 'text' and 'bg' colors. The 'primary' color should stand out. The 'link' color should be readable against the 'card' and 'bg' colors.`;
+
+        try {
+            const response = await ai.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: `The user wants a theme that feels like: "${prompt}".`,
+                config: {
+                    systemInstruction: systemInstruction,
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: Type.OBJECT,
+                        properties: {
+                            primary: { type: Type.STRING, description: "The main accent color for buttons and highlights. Hex code." },
+                            bg: { type: Type.STRING, description: "The main page background color. Hex code." },
+                            card: { type: Type.STRING, description: "The background color for cards and containers. Hex code." },
+                            text: { type: Type.STRING, description: "The primary text color. Hex code." },
+                            muted: { type: Type.STRING, description: "The color for secondary or less important text. Hex code." },
+                            link: { type: Type.STRING, description: "The color for hyperlinks. Hex code." }
+                        },
+                        required: ["primary", "bg", "card", "text", "muted", "link"]
+                    },
+                },
+            });
+
+            const jsonString = response.text;
+            if (jsonString) {
+                const theme = JSON.parse(jsonString);
+                applyThemePreview(theme);
+                showToast("Theme generated! Click 'Save All Changes' to keep it.");
+            } else {
+                throw new Error("AI response was empty.");
+            }
+
+        } catch (error) {
+            console.error("AI Theme Generation Error:", error);
+            showToast("Failed to generate theme. Please try a different prompt.", "error");
+        } finally {
+            btn.classList.remove('btn-loading');
+        }
+    }
 
 
     function addEventListeners() {
-    document.querySelector('.auth-tabs')?.addEventListener('click', e => {
-    if (e.target.classList.contains('tab')) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    e.target.classList.add('active');
-    const isLogin = e.target.dataset.tab === 'login';
-    document.getElementById('login-form-container').classList.toggle('hidden', !isLogin);
-    document.getElementById('signup-form').classList.toggle('hidden', isLogin);
-    }
-    });
-    
-    document.getElementById('signup-form')?.addEventListener('submit', handleEmailSignup);
-    document.getElementById('login-form')?.addEventListener('submit', handleEmailLogin);
-    document.getElementById('google-login-btn')?.addEventListener('click', handleGoogleLogin);
-    document.getElementById('logout-btn')?.addEventListener('click', handleLogout);
-    document.getElementById('delete-account-btn')?.addEventListener('click', handleDeleteAccount);
-    document.getElementById('save-settings-btn')?.addEventListener('click', handleSaveSettings);
-    document.getElementById('share-status-btn')?.addEventListener('click', handleShareStatus);
-    document.getElementById('run-search-btn')?.addEventListener('click', handleSearchUsers);
-    document.getElementById('generate-qrcode-btn')?.addEventListener('click', handleGenerateQrCode);
-    document.getElementById('connect-gcal-btn')?.addEventListener('click', handleConnectGoogleCalendar);
-    document.getElementById('disconnect-gcal-btn')?.addEventListener('click', handleDisconnectGoogleCalendar);
-
-    // This is for the button that triggers the Gemini AI to analyze calendar events.
-    document.getElementById('gemini-sync-btn')?.addEventListener('click', handleGeminiAiSync);
-
-    // This listens for clicks on the main navigation header to switch between pages.
-    document.getElementById('mainHeader')?.addEventListener('click', (e) => {
-        if (e.target.closest('.nav-btn')) {
-            navigateTo(e.target.closest('.nav-btn').dataset.page, false);
+        document.querySelector('.auth-tabs')?.addEventListener('click', e => {
+        if (e.target.classList.contains('tab')) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+        const isLogin = e.target.dataset.tab === 'login';
+        document.getElementById('login-form-container').classList.toggle('hidden', !isLogin);
+        document.getElementById('signup-form').classList.toggle('hidden', isLogin);
         }
-    });
+        });
+        
+        document.getElementById('signup-form')?.addEventListener('submit', handleEmailSignup);
+        document.getElementById('login-form')?.addEventListener('submit', handleEmailLogin);
+        document.getElementById('google-login-btn')?.addEventListener('click', handleGoogleLogin);
+        document.getElementById('logout-btn')?.addEventListener('click', handleLogout);
+        document.getElementById('delete-account-btn')?.addEventListener('click', handleDeleteAccount);
+        document.getElementById('save-settings-btn')?.addEventListener('click', handleSaveSettings);
+        document.getElementById('share-status-btn')?.addEventListener('click', handleShareStatus);
+        document.getElementById('run-search-btn')?.addEventListener('click', handleSearchUsers);
+        document.getElementById('generate-qrcode-btn')?.addEventListener('click', handleGenerateQrCode);
+        document.getElementById('connect-gcal-btn')?.addEventListener('click', handleConnectGoogleCalendar);
+        document.getElementById('disconnect-gcal-btn')?.addEventListener('click', handleDisconnectGoogleCalendar);
+        document.getElementById('gemini-sync-btn')?.addEventListener('click', handleGeminiAiSync);
+        document.getElementById('generate-ai-theme-btn')?.addEventListener('click', handleGenerateAiTheme);
+        
+        document.getElementById('preset-themes-container').addEventListener('click', (e) => {
+            const button = e.target.closest('.preset-theme-btn');
+            if (button) {
+                const themeName = button.dataset.themeName;
+                const theme = PREDEFINED_THEMES[themeName];
+                if (theme) {
+                    applyThemePreview(theme);
+                }
+            }
+        });
 
-    const countrySearchInput = document.getElementById('country-search');
-    const countryDropdown = document.getElementById('country-dropdown');
-    countrySearchInput?.addEventListener('focus', () => {
-        filterCountries('country-search', 'country-dropdown');
-        countryDropdown.classList.remove('hidden');
-    });
-    countrySearchInput?.addEventListener('input', () => filterCountries('country-search', 'country-dropdown'));
+        document.getElementById('reset-theme-btn')?.addEventListener('click', () => {
+            const isDarkMode = document.body.classList.contains('dark');
+            const defaultTheme = PREDEFINED_THEMES['Sky'];
+            applyThemePreview(defaultTheme);
+            if (App.currentProfileData) {
+                App.currentProfileData.customTheme = null;
+            }
+            showToast("Theme reset to default. Click Save to confirm.");
+        });
 
-    // This handles the gamified tier upgrade animation.
-    document.getElementById('gift-box-icon')?.addEventListener('click', (e) => {
-        e.target.classList.add('unboxing');
-        setTimeout(() => {
-            document.getElementById('upgrade-gift-stage').style.display = 'none';
-            document.getElementById('upgrade-results-stage').classList.add('show');
-        }, 500);
-    });
+        document.getElementById('mainHeader')?.addEventListener('click', (e) => {
+            if (e.target.closest('.nav-btn')) {
+                navigateTo(e.target.closest('.nav-btn').dataset.page, false);
+            }
+        });
 
-    // Closes the tier upgrade modal.
-    document.getElementById('close-upgrade-modal-btn')?.addEventListener('click', () => {
-        const modal = document.getElementById('tier-upgrade-modal');
-        modal.classList.remove('show');
-        // Reset the modal for next time
-        setTimeout(() => {
-            document.getElementById('upgrade-gift-stage').style.display = 'block';
-            document.getElementById('upgrade-results-stage').classList.remove('show');
-            document.getElementById('gift-box-icon').classList.remove('unboxing');
-        }, 500);
-    });
-}
+        const countrySearchInput = document.getElementById('country-search');
+        const countryDropdown = document.getElementById('country-dropdown');
+        countrySearchInput?.addEventListener('focus', () => {
+            filterCountries('country-search', 'country-dropdown');
+            countryDropdown.classList.remove('hidden');
+        });
+        countrySearchInput?.addEventListener('input', () => filterCountries('country-search', 'country-dropdown'));
 
-// This is the final line of the script. It tells the browser to run the 
-// handlePageLoad function once the entire HTML document has been loaded.
-// This ensures that all elements are available in the DOM before any scripts try to interact with them.
+        document.getElementById('gift-box-icon')?.addEventListener('click', (e) => {
+            e.target.classList.add('unboxing');
+            setTimeout(() => {
+                document.getElementById('upgrade-gift-stage').style.display = 'none';
+                document.getElementById('upgrade-results-stage').classList.add('show');
+            }, 500);
+        });
+
+        document.getElementById('close-upgrade-modal-btn')?.addEventListener('click', () => {
+            const modal = document.getElementById('tier-upgrade-modal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                document.getElementById('upgrade-gift-stage').style.display = 'block';
+                document.getElementById('upgrade-results-stage').classList.remove('show');
+                document.getElementById('gift-box-icon').classList.remove('unboxing');
+            }, 500);
+        });
+    }
+
 window.onload = handlePageLoad;
 
 </script>
