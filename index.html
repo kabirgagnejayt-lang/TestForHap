@@ -3,276 +3,2300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Calendar Events</title>
-    <!-- Tailwind CSS for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter -->
+    <title id="app-title">Hyper Availability Profile (HAP)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Roboto+Mono:wght@400;700&family=Playfair+Display:wght@700&display=swap');
+    :root {
+    --primary: #0ea5e9; --primary-light: #f0f9ff; --primary-dark: #0369a1;
+    --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b;
+    --border-color: #e2e8f0; --input-bg: #f1f5f9;
+    --radius: 12px; --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --pfp-bg-day: var(--primary-light);
+    --pfp-border-day: var(--primary);
+    --link-text-color: #0369a1;
+    --display-font: 'Inter', sans-serif;
+    }
+    body.dark {
+    --primary: #38bdf8; --primary-light: #1e293b; --primary-dark: #7dd3fc;
+    --bg: #020617; --card: #0f172a; --text: #e2e8f0; --muted: #94a3b8;
+    --border-color: #334155; --input-bg: #1e293b;
+    --link-text-color: #7dd3fc; /* FIXED: Added for dark mode readability */
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+    @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    @keyframes unbox {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    @keyframes feature-reveal {
+      from { opacity: 0; transform: translateY(20px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .page.active { animation: fadeIn 0.5s ease-out forwards; }
+    .card, .history-item, .search-result-item { animation: fadeSlideUp 0.6s ease-out forwards; opacity: 0; transform: translateY(15px); animation-fill-mode: both; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+    margin: 0; padding: 20px 0 100px 0;
+    font-family: var(--display-font);
+    background: var(--bg); color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.4s, color 0.4s;
+    }
+    header {
+    padding: 10px 14px; display: flex; gap: 12px; align-items: center; justify-content: center;
+    background: var(--card); box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+    position: fixed; bottom: 0; left: 0; right: 0;
+    z-index: 100; border-top: 1px solid var(--border-color);
+    transition: transform 0.4s ease-in-out, background-color 0.4s;
+    }
+    header.hidden { transform: translateY(100%); }
+    nav { display: flex; gap: 8px; align-items: center; width: 100%; max-width: 500px; justify-content: space-around; }
+    .nav-btn {
+    background: transparent; border: none; padding: 8px 10px; border-radius: 8px;
+    cursor: pointer; color: var(--muted); font-weight: 500; font-size: 0.9rem;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    transition: all 0.2s ease;
+    }
+    .nav-btn.active { background: var(--primary-light); color: var(--primary-dark); }
+    .nav-btn:hover { color: var(--primary-dark); transform: translateY(-2px); }
+    .nav-btn svg { width: 24px; height: 24px; }
+    .container { max-width: 700px; margin: 0 auto; padding: 0 14px; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 20px; transition: background-color 0.4s, transform 0.3s ease; }
+    h1 { font-size: 2.25rem; font-weight: 700; margin: 0 0 8px 0; text-align: center; }
+    h2 { font-size: 1.5rem; font-weight: 600; margin: 0 0 16px 0; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
+    h3 { font-size: 1.2rem; font-weight: 600; margin-top: 20px; }
+    p { color: var(--muted); line-height: 1.6; margin: 4px 0; }
+    label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--muted); }
+    input, select, textarea, button { font-size: 1rem; font-family: inherit; }
+    input[type="text"], input[type="email"], input[type="password"], input[type="url"], input[type="number"], input[type="time"], input[type="date"], input[type="tel"], select, textarea {
+    width: 100%; box-sizing: border-box; padding: 12px; border-radius: 8px;
+    border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text);
+    transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    textarea { resize: vertical; min-height: 80px; }
+    input[type="color"] { width: 100%; height: 44px; padding: 0; border: none; background: transparent; cursor: pointer; }
+    input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); border-color: var(--primary); }
+    .btn {
+    background: var(--primary); color: white; border: none; padding: 12px 18px;
+    border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s ease;
+    width: 100%; text-align: center; display: inline-flex; justify-content: center; align-items: center; gap: 8px;
+    }
+    .btn:hover { background-color: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .btn:active { transform: translateY(0) scale(0.98); }
+    .btn.secondary { background: var(--primary-light); color: var(--primary-dark); }
+    .btn.secondary:hover { background-color: var(--primary); color: white; }
+    .btn:disabled { background-color: var(--muted); cursor: not-allowed; transform: none; box-shadow: none; }
+    .form-group { margin-bottom: 20px; }
+    #loginPage .card { margin-top: 40px; }
+    .auth-tabs { display: flex; margin-bottom: 25px; border-radius: 10px; background: var(--input-bg); padding: 5px; }
+    .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; border-radius: 8px; font-weight: 500; transition: background-color 0.3s ease, color 0.3s; }
+    .tab.active { background-color: var(--primary); color: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    .social-login-btn { margin-top: 10px; background: #4285F4; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .social-login-btn:hover { background: #3c7ceb; }
+    .profile-header { text-align: center; margin-bottom: 30px; padding: 20px 0; }
+    #profile-pfp {
+    width: 96px; height: 96px; border-radius: 50%; margin: 0 auto 16px auto;
+    background-color: var(--pfp-bg-day); background-size: cover; background-position: center;
+    border: 3px solid var(--pfp-border-day); transition: all 0.4s;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 3rem; font-weight: 700; color: var(--primary-dark);
+    }
+    .profile-emoji { font-size: 4rem; line-height: 1; margin: 16px 0; }
+    .profile-name { 
+    font-weight: 700; margin: 0; font-family: var(--display-font); 
+    display: flex; justify-content: center; align-items: center; 
+    font-size: 2.25rem;
+    color: var(--text);
+    }
+    .profile-name.is-owner { color: #ef4444; }
+    .role-badge-container {
+    display: flex; justify-content: center; align-items: center;
+    gap: 8px; margin: 5px auto 16px auto; flex-wrap: wrap; flex-direction: column;
+    }
+    .membership-badge {
+    font-size: 0.8rem; font-weight: 700; padding: 4px 10px; 
+    border-radius: 6px; color: white;
+    }
+    .tier-Member { background-color: #64748b; }
+    .tier-Plus { background-color: #a855f7; }
+    .tier-Pro { background: linear-gradient(45deg, #f59e0b, #fbbf24); }
+    .tier-Max { background: linear-gradient(45deg, #4f46e5, #7c3aed); }
+    .tier-Owner { background-color: #ef4444; }
+    .inline-verified-icon {
+    color: #0ea5e9; margin-left: 8px;
+    width: 24px; height: 24px; flex-shrink: 0;
+    }
+    .profile-message { font-size: 1.2rem; color: var(--muted); min-height: 28px; }
+    .profile-timer { font-size: 2.5rem; color: var(--primary); font-weight: 700; margin-top: 24px; min-height: 40px; }
+    .profile-country { display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500; margin-top: 10px; }
+    .profile-country .flag-emoji { font-size: 1.5rem; }
+    .custom-link {
+    display: inline-flex; align-items: center; gap: 8px; background: var(--primary-light);
+    padding: 10px 15px; border-radius: 8px; text-decoration: none; color: var(--link-text-color);
+    font-weight: 500; transition: all 0.2s ease;
+    }
+    .custom-link:hover { background-color: var(--primary); color: #fff; transform: translateY(-2px); }
+    .custom-link svg { width: 18px; height: 18px; }
+    .action-links-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 20px; }
+    .personal-detail-item { font-size: 1rem; padding: 8px 0; border-bottom: 1px dashed var(--border-color); }
+    .link-group, .privacy-group { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-bottom: 15px; align-items: center; }
+    @media (max-width: 500px) { .link-group, .privacy-group { grid-template-columns: 1fr; } }
+    .country-select-wrapper { position: relative; }
+    .country-dropdown {
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: var(--card); border: 1px solid var(--border-color); border-radius: 8px;
+    max-height: 200px; overflow-y: auto; z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .country-option { padding: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+    .country-option:hover { background: var(--input-bg); }
+    .country-option .flag-emoji { font-size: 1.2rem; }
+    .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-top: 20px; }
+    .analytics-metric { background: var(--input-bg); padding: 15px; border-radius: 8px; text-align: center; border: 1px solid var(--border-color); }
+    .metric-value { font-size: 2rem; font-weight: 700; color: var(--primary); margin: 0 0 5px 0; }
+    .metric-label { font-size: 0.9rem; color: var(--muted); font-weight: 500; }
+    .history-item { padding: 10px 0; border-left: 3px solid var(--border-color); margin-left: 10px; padding-left: 15px; position: relative; }
+    .history-item:before {
+    content: ''; position: absolute; left: -8px; top: 15px;
+    width: 13px; height: 13px; background: var(--primary); border-radius: 50%;
+    border: 3px solid var(--card); box-shadow: 0 0 0 2px var(--primary);
+    }
+    .history-status { font-weight: 600; color: var(--text); display: block; }
+    .history-time { font-size: 0.8rem; color: var(--muted); }
+    .search-result-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border-color); }
+    .search-result-item a { text-decoration: none; font-weight: 600; color: var(--primary); }
+    footer { margin-top: 40px; text-align: center; color: var(--muted); font-size: 0.9rem; padding: 20px 0; border-top: 1px solid var(--border-color); }
+    footer a { color: var(--primary); text-decoration: none; margin: 0 5px; }
+    footer a:hover { text-decoration: underline; }
+    .hidden { display: none !important; }
+    #error-message { color: #ef4444; text-align: center; min-height: 24px; font-weight: bold; margin-top: 15px; }
+    #toast {
+    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #0f172a; color: white; padding: 12px 20px; border-radius: 8px;
+    z-index: 3000; visibility: hidden; opacity: 0; transition: all 0.4s ease;
+    text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    #toast.show { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); }
+    #global-error-display {
+    position: fixed; top: 0; left: 0; right: 0; padding: 15px;
+    background: #f87171; color: white; text-align: center; font-weight: bold;
+    z-index: 5000; display: none; border-bottom: 2px solid #ef4444;
+    }
+    .btn-loading { pointer-events: none; opacity: 0.8; }
+    .btn-loading .btn-text { display: none; }
+    .btn-loading::after {
+    content: ""; display: inline-block;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid white; border-radius: 50%;
+    width: 16px; height: 16px; animation: spin 1s linear infinite;
+    }
+    .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9rem; }
+    .admin-table th, .admin-table td { padding: 12px; border: 1px solid var(--border-color); text-align: left; }
+    .admin-table th { background-color: var(--input-bg); }
+    .admin-table select { padding: 6px; }
+    .achievement-item { margin-bottom: 15px; }
+    .achievement-progress { width: 100%; background: var(--input-bg); border-radius: 8px; height: 10px; overflow: hidden; margin-top: 6px; }
+    .progress-bar { height: 100%; background: var(--primary); border-radius: 8px; transition: width 0.5s ease; }
+    .verification-request-card { background: var(--input-bg); padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+    .verification-request-card p { margin: 0 0 10px 0; }
+    .verification-actions { display: flex; gap: 10px; margin-top: 10px; }
+    .tier-plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
+    .tier-plan-card { background: var(--input-bg); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border-color); }
+    .tier-plan-card h3 { margin-top: 0; display: flex; align-items: center; gap: 8px; }
+    .tier-plan-card ul { list-style-type: '✓ '; padding-left: 20px; color: var(--muted); }
+    .tier-plan-card ul li { margin-bottom: 8px; }
+    #top-ad-container a, #bottom-ad-container a {
+      display: block; text-decoration: none; color: inherit;
+      border-radius: var(--radius); transition: transform 0.2s ease;
+    }
+    #top-ad-container a:hover, #bottom-ad-container a:hover { transform: scale(1.02); }
+    #top-ad-container img { max-width: 100%; border-radius: var(--radius); display: block; }
+    #bottom-ad-container { font-weight: 500; background-color: var(--input-bg); }
+    #create-hap-promo-top {
+      padding: 10px 15px; display: flex; align-items: center;
+      justify-content: space-between; gap: 15px;
+    }
+    #create-hap-promo-top h3, #create-hap-promo-top p { margin: 0; text-align: left; }
+    #create-hap-promo-top h3 { font-size: 1rem; }
+    #create-hap-promo-top p { font-size: 0.9rem; }
+    #create-hap-promo-top .btn {
+      flex-shrink: 0; padding: 8px 12px; font-size: 0.9rem; width: auto;
+    }
+    @media (max-width: 500px) {
+      #create-hap-promo-top { flex-direction: column; text-align: center; }
+      #create-hap-promo-top h3, #create-hap-promo-top p { text-align: center; }
+    }
+    .tier-upgrade-modal {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.6); z-index: 4000;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s;
+    }
+    .tier-upgrade-modal.show { opacity: 1; visibility: visible; }
+    .upgrade-modal-content {
+      background: var(--card); color: var(--text); padding: 30px;
+      border-radius: var(--radius); width: 90%; max-width: 400px;
+      text-align: center; position: relative;
+    }
+    .gift-box { cursor: pointer; font-size: 6rem; transition: transform 0.2s ease; }
+    .gift-box:hover { transform: scale(1.1); animation: shake 0.5s; }
+    .gift-box.unboxing { animation: unbox 0.5s ease-out forwards; }
+    .upgrade-results { display: none; }
+    .upgrade-results.show { display: block; }
+    .unlocked-feature {
+      background-color: var(--input-bg); padding: 10px;
+      border-radius: 8px; margin-bottom: 10px; font-weight: 500;
+      animation: feature-reveal 0.5s ease-out; /* FIXED: Corrected animation property */
+      animation-fill-mode: backwards;
+    }
+    .country-stat-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color); }
+    .country-stat-item:last-child { border-bottom: none; }
+    #views-chart-container { display: flex; justify-content: space-around; align-items: flex-end; height: 150px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-top: 20px; }
+    .chart-bar-wrapper { flex: 1; text-align: center; display: flex; flex-direction: column; justify-content: flex-end; }
+    .chart-bar { background: var(--primary); width: 60%; margin: 0 auto; transition: height 0.5s ease-out; border-radius: 4px 4px 0 0; }
+    .chart-label { font-size: 0.8rem; color: var(--muted); margin-top: 8px; }
+    #loading-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--bg); z-index: 9999;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      transition: opacity 0.5s ease;
+    }
+    #loading-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 5px solid var(--border-color);
+      border-bottom-color: var(--primary);
+      border-radius: 50%;
+      display: inline-block;
+      box-sizing: border-box;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    .modal {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.6); z-index: 4000;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s;
+    }
+    .modal.show { opacity: 1; visibility: visible; }
+    .modal-content {
+      background: var(--card); color: var(--text); padding: 30px;
+      border-radius: var(--radius); width: 90%; max-width: 500px;
+      position: relative;
+    }
+    .modal-close-btn {
+      position: absolute; top: 10px; right: 10px;
+      background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--muted);
+    }
+    /* Timetable Styles */
+    #timetable-grid {
+        display: grid;
+        grid-template-columns: 50px repeat(7, 1fr);
+        gap: 2px;
+        margin-top: 20px;
+        font-size: 0.75rem;
+    }
+    .time-label, .day-header, .time-slot {
+        background-color: var(--input-bg);
+        padding: 5px;
+        text-align: center;
+        border-radius: 4px;
+    }
+    .day-header { font-weight: bold; color: var(--text); }
+    .time-label { font-weight: 500; color: var(--muted); }
+    .time-slot { background-color: #4ade8020; /* Light green for available */ }
+    .time-slot.busy { background-color: var(--primary); opacity: 0.7; }
     </style>
-    <script type="text/javascript">
-        /*
-         * =========================================================================
-         * IMPORTANT: PASTE YOUR GOOGLE CLOUD CREDENTIALS HERE
-         * =========================================================================
-         */
-        const API_KEY = 'AIzaSyCUhd0JfEzWlolkgAjPvfd6Fsyl60XtEY0'; 
-        const CLIENT_ID = '703348367691-fto8h5ngp2hm5qn5fkbfhtsh7re3pcub.apps.googleusercontent.com';
-
-        /*
-         * =========================================================================
-         * CONFIGURATION - You shouldn't need to change these
-         * =========================================================================
-         */
-        const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
-        const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
-
-        let tokenClient;
-        let gapiInited = false;
-        let gisInited = false;
-
-        // We will get references to the buttons after the DOM has loaded.
-        let authorizeButton;
-        let signoutButton;
-        let eventsContainer;
-        let instructions;
-
-        document.addEventListener('DOMContentLoaded', () => {
-            authorizeButton = document.getElementById('authorize_button');
-            signoutButton = document.getElementById('signout_button');
-            eventsContainer = document.getElementById('events_container');
-            instructions = document.getElementById('instructions');
-
-            authorizeButton.onclick = handleAuthClick;
-            signoutButton.onclick = handleSignoutClick;
-        });
-
-
-        /**
-         * Callback after api.js is loaded.
-         */
-        function gapiLoaded() {
-            gapi.load('client', initializeGapiClient);
-        }
-
-        /**
-         * Callback after the API client is loaded. Loads the
-         * discovery doc to initialize the API.
-         */
-        async function initializeGapiClient() {
-            await gapi.client.init({
-                apiKey: API_KEY,
-                discoveryDocs: [DISCOVERY_DOC],
-            });
-            gapiInited = true;
-            maybeEnableButtons();
-        }
-
-        /**
-         * Callback after Google Identity Services are loaded.
-         */
-        function gisLoaded() {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID,
-                scope: SCOPES,
-                callback: '', // defined later
-            });
-            gisInited = true;
-            maybeEnableButtons();
-        }
-
-        /**
-         * Enables user interaction after all libraries are loaded.
-         */
-        function maybeEnableButtons() {
-            if (gapiInited && gisInited && authorizeButton) {
-                authorizeButton.disabled = false;
-            }
-        }
-
-        /**
-         * Sign in the user upon button click.
-         */
-        function handleAuthClick() {
-            tokenClient.callback = async (resp) => {
-                if (resp.error !== undefined) {
-                    throw (resp);
-                }
-                updateUIForAuth();
-                await listUpcomingEvents();
-            };
-
-            if (gapi.client.getToken() === null) {
-                // Prompt the user to select a Google Account and ask for consent to share their data
-                // when establishing a new session.
-                tokenClient.requestAccessToken({prompt: 'consent'});
-            } else {
-                // Skip display of account chooser and consent dialog for an existing session.
-                tokenClient.requestAccessToken({prompt: ''});
-            }
-        }
-
-        /**
-         * Sign out the user upon button click.
-         */
-        function handleSignoutClick() {
-            const token = gapi.client.getToken();
-            if (token !== null) {
-                google.accounts.oauth2.revoke(token.access_token);
-                gapi.client.setToken('');
-                updateUIForSignout();
-            }
-        }
-
-        /**
-         * Updates the UI to reflect that the user is authorized.
-         */
-        function updateUIForAuth() {
-            authorizeButton.classList.add('hidden');
-            signoutButton.classList.remove('hidden');
-            instructions.classList.add('hidden');
-            eventsContainer.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 py-8">Loading events...</p>';
-        }
-
-        /**
-         * Updates the UI to reflect that the user is signed out.
-         */
-        function updateUIForSignout() {
-            authorizeButton.classList.remove('hidden');
-            signoutButton.classList.add('hidden');
-            instructions.classList.remove('hidden');
-            eventsContainer.innerHTML = '<p id="status_message" class="text-center text-gray-500 dark:text-gray-400 py-8">Please authorize to see your upcoming events.</p>';
-        }
-
-
-        /**
-         * Print the summary and start datetime/date of the next 10 events in the
-         * user's primary calendar. If no events are found, print a message.
-         */
-        async function listUpcomingEvents() {
-            let response;
-            try {
-                const request = {
-                    'calendarId': 'primary',
-                    'timeMin': (new Date()).toISOString(),
-                    'showDeleted': false,
-                    'singleEvents': true,
-                    'maxResults': 10,
-                    'orderBy': 'startTime',
-                };
-                response = await gapi.client.calendar.events.list(request);
-            } catch (err) {
-                eventsContainer.innerHTML = `<p class="text-center text-red-500 dark:text-red-400 py-8">Error: ${err.message}</p>`;
-                return;
-            }
-
-            const events = response.result.items;
-            if (!events || events.length == 0) {
-                eventsContainer.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 py-8">No upcoming events found.</p>';
-                return;
-            }
-
-            // Clear previous content
-            eventsContainer.innerHTML = '';
-            
-            // Flatten to string to display
-            events.forEach(event => {
-                const when = event.start.dateTime;
-                const eventElement = document.createElement('div');
-                eventElement.className = "p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 flex items-start space-x-4";
-                
-                const date = new Date(when || event.start.date);
-                
-                const dateBlock = `
-                    <div class="flex-shrink-0 text-center bg-blue-100 dark:bg-blue-900/50 p-3 rounded-md w-20">
-                        <p class="text-blue-600 dark:text-blue-300 font-bold text-sm">${date.toLocaleString('default', { month: 'short' }).toUpperCase()}</p>
-                        <p class="text-gray-900 dark:text-white font-extrabold text-2xl">${date.getDate()}</p>
-                    </div>
-                `;
-
-                const eventDetails = `
-                    <div>
-                        <h3 class="font-semibold text-lg text-gray-900 dark:text-white">${event.summary}</h3>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">${formatEventTime(event.start, event.end)}</p>
-                    </div>
-                `;
-
-                eventElement.innerHTML = dateBlock + eventDetails;
-                eventsContainer.appendChild(eventElement);
-            });
-        }
-        
-        /**
-         * Helper function to format the event time range.
-         */
-        function formatEventTime(start, end) {
-            const startDate = new Date(start.dateTime || start.date);
-            const endDate = new Date(end.dateTime || end.date);
-            
-            const options = {
-                hour: 'numeric',
-                minute: 'numeric',
-                hour12: true
-            };
-
-            // Handle all-day events
-            if (start.date) {
-                // Check if it's a multi-day event
-                if (endDate.getTime() > startDate.getTime() + 86400000) { // More than 1 day
-                     return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
-                }
-                return 'All day';
-            }
-            
-            const startTimeString = startDate.toLocaleString('en-US', options);
-            const endTimeString = endDate.toLocaleString('en-US', options);
-            
-            return `${startTimeString} - ${endTimeString}`;
-        }
+    <script type="importmap">
+    {
+      "imports": {
+        "@google/genai": "https://esm.run/@google/genai",
+        "qrcode": "https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.mjs"
+      }
+    }
     </script>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 flex items-center justify-center min-h-screen p-4">
+<body>
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading Profile...</p>
+    </div>
+    <div id="global-error-display">A critical error occurred. Check the console for details.</div>
+    <header id="mainHeader" class="hidden"></header>
+    <div class="container">
+    <div id="loginPage" class="page">
+    <div class="card">
+    <h1>Hyper Availability</h1>
+    <p style="text-align: center;">Your real-time public status page.</p>
+    <div class="auth-tabs">
+    <div class="tab active" data-tab="login">Login</div>
+    <div class="tab" data-tab="signup">Sign Up</div>
+    </div>
+    <div id="login-form-container">
+    <form id="login-form">
+    <div class="form-group"><input type="email" id="login-email" placeholder="Email" required autocomplete="email"></div>
+    <div class="form-group"><input type="password" id="login-password" placeholder="Password" required autocomplete="current-password"></div>
+    <button type="submit" class="btn"><span class="btn-text">Login</span></button>
+    </form>
+    <button id="google-login-btn" class="social-login-btn">
+    <svg viewBox="0 0 24 24" width="24" height="24" style="background: white; border-radius: 50%; padding: 4px;"><path fill="#EA4335" d="M5.266 9.389a6.6 6.6 0 0 1 .235-1.565h3.08v3.136H5.266z"></path><path fill="#4285F4" d="M12 21.36c-2.333 0-4.32-.778-5.755-2.072L9.36 17.06c.9.605 2.07 1.05 3.398 1.05 2.872 0 4.673-1.637 4.673-3.957 0-1.724-.96-2.91-2.5-3.69v-3.3h3.045c2.324 0 3.86 1.764 3.86 5.25 0 4.8-3.045 7.027-7.426 7.027z"></path><path fill="#FBBC05" d="M12 7.03c1.64 0 2.977.674 3.69 1.344l2.42-2.348C17.042 4.417 15.02 3 12 3 7.61 3 4.195 5.253 2.57 9.172l3.045 2.368c.57-1.897 2.37-3.67 6.385-3.67z"></path><path fill="#34A853" d="M5.504 12.87a6.22 6.22 0 0 1-.238-1.564H2.227v3.136h3.277z"></path></svg>
+    Login with Google
+    </button>
+    </div>
+    <form id="signup-form" class="hidden">
+    <h3>Create Personal Account</h3>
+    <div class="form-group"><input type="text" id="signup-name" placeholder="Display Name" required autocomplete="name"></div>
+    <div class="form-group"><input type="email" id="signup-email" placeholder="Email" required autocomplete="email"></div>
+    <div class="form-group"><input type="password" id="signup-password" placeholder="Password (min. 6 chars)" required autocomplete="new-password"></div>
+    <button type="submit" class="btn"><span class="btn-text">Create Personal Account</span></button>
+    </form>
+    <p id="error-message"></p>
+    </div>
+    </div>
+    <div id="profilePage" class="page">
+    <div id="create-hap-promo-top" class="card hidden"></div>
+    <div id="top-ad-container" class="card hidden" style="padding: 10px; text-align: center;"></div>
+    <div class="profile-header">
+    <div id="profile-pfp"></div> 
+    <div style="padding: 0 20px 20px 20px;">
+    <h1 class="profile-name" id="profile-name">Loading...</h1>
+    <div id="membership-tier-display-container" class="role-badge-container"></div>
+    <div class="profile-emoji" id="profile-emoji">❓</div>
+    <p class="profile-message" id="profile-message">Fetching status...</p>
+    <div class="profile-timer" id="profile-timer"></div>
+    <p class="local-time-display" id="local-time-info" style="font-size: 1rem; margin-top: 10px; font-weight: 500;"></p>
+    </div>
+    </div>
+    <div class="card action-links-container" id="profile-action-links"></div>
 
-    <div class="w-full max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Upcoming Calendar Events</h1>
-                <p class="text-gray-500 dark:text-gray-400 mt-1">A simple client-side Google Calendar API integration.</p>
-            </div>
-            <div class="flex space-x-2 mt-4 md:mt-0">
-                <button id="authorize_button" disabled class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed">
-                    Authorize
-                </button>
-                <button id="signout_button" class="hidden bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
-                    Sign Out
-                </button>
-            </div>
+    <div class="card hidden" id="calendar-view-card">
+        <h2>Weekly Availability</h2>
+        <div id="calendar-timetable">
+            <p class="muted">Connect Google Calendar to see your schedule here.</p>
         </div>
-
-        <!-- Instructions Section -->
-        <div id="instructions" class="mb-6 p-4 bg-yellow-100 dark:bg-gray-700 border-l-4 border-yellow-500 dark:border-yellow-400 rounded-r-lg">
-            <h3 class="font-bold text-yellow-800 dark:text-yellow-300">Action Required</h3>
-            <p class="text-sm text-yellow-700 dark:text-yellow-200 mt-1">
-                To use this, you must get an <strong>API Key</strong> and <strong>OAuth 2.0 Client ID</strong> from the <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer" class="underline hover:text-yellow-500">Google Cloud Console</a>.
-                Make sure to enable the "Google Calendar API" and configure your OAuth consent screen with the correct authorized JavaScript origins. Then, paste your credentials into the script below.
-            </p>
-        </div>
-        
-        <!-- Events list container -->
-        <div id="events_container" class="space-y-4">
-            <p id="status_message" class="text-center text-gray-500 dark:text-gray-400 py-8">Please authorize to see your upcoming events.</p>
+        <div id="gcal-backend-notice" class="hidden" style="background: var(--input-bg); padding: 10px; border-radius: 8px; margin-top: 15px;">
+            <p style="margin: 0; font-size: 0.9rem;"><strong>Note:</strong> Automatic calendar syncing requires a secure backend process (like a Cloud Function) to complete. For this demo, events won't appear here automatically after connecting. You can still use the "Analyze with Gemini AI" feature in Settings to manually update your status from your agenda.</p>
         </div>
     </div>
 
-    <!-- Google API Client and Identity Services Scripts -->
-    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+    <div class="card">
+    <h2>About</h2>
+    <div id="personal-details-list"><p class="muted">Loading personal info...</p></div>
+    </div>
+    <div class="card">
+    <h2>Custom Links</h2>
+    <div id="profile-links"><p class="muted">No links provided.</p></div>
+    </div>
+    <div id="share-profile-card" class="card">
+    <h2>Share Profile</h2>
+    <div style="text-align: center;">
+    <div id="qrcode-container" style="display: inline-block; padding: 15px; background: var(--card); border-radius: 8px; border: 1px solid var(--border-color); min-height: 230px;">
+    <img id="profile-qrcode-img" width="200" height="200" loading="lazy" style="display: none; border-radius: 4px;" alt="Profile QR Code"> 
+    <p id="qrcode-placeholder" class="muted">Click button below to generate QR.</p>
+    </div>
+    </div>
+    <button id="generate-qrcode-btn" class="btn secondary" style="margin-top: 15px;"><span class="btn-text">Generate QR Code</span></button>
+    <button id="share-status-btn" class="btn" style="margin-top: 10px;"><span class="btn-text">Copy Profile Link</span></button>
+    </div>
+    <div id="bottom-ad-container" class="card hidden" style="padding: 20px; text-align: center;"></div>
+    <div id="create-hap-promo-bottom" class="card hidden"></div>
+    </div>
+    <div id="searchPage" class="page">
+    <div class="card">
+    <h2>HAP Directory 🌐</h2>
+    <div class="form-group" style="margin-bottom: 0;">
+    <input type="text" id="user-search-input" placeholder="Search users by name...">
+    </div>
+    <button id="run-search-btn" class="btn secondary" style="margin-top: 10px;"><span class="btn-text">Search / Load Directory</span></button>
+    <div id="search-results-list" style="margin-top: 20px;">
+    <p class="muted">Search for users by name or click 'Search' to view all public profiles.</p>
+    </div>
+    </div>
+    </div>
+    <div id="analyticsPage" class="page">
+    <div class="card">
+    <h2>Profile View Analytics 📈</h2>
+    <div class="analytics-grid" id="view-analytics-grid">
+    <div class="analytics-metric"><p class="metric-value" id="views-total">0</p><p class="metric-label">Total Views</p></div>
+    <div class="analytics-metric"><p class="metric-value" id="views-unique">0</p><p class="metric-label">Unique Visitors</p></div>
+    <div class="analytics-metric"><p class="metric-value" id="views-today">0</p><p class="metric-label">Views Today</p></div>
+    <div class="analytics-metric"><p class="metric-value" id="views-week">0</p><p class="metric-label">Views Last 7 Days</p></div>
+    </div>
+    <div id="analytics-upgrade-prompt" class="hidden" style="text-align: center; margin-top: 20px;">
+        <p>Upgrade to the <strong>Personal</strong> tier for more detailed analytics!</p>
+    </div>
+    </div>
+    <div class="card" id="analytics-chart-card">
+        <h2>Last 7 Days Trend</h2>
+        <div id="views-chart-container"><p class="muted">Loading chart data...</p></div>
+    </div>
+    <div class="card" id="analytics-country-card">
+        <h2>Views by Country</h2>
+        <div id="country-stats-list"><p class="muted">Loading country data...</p></div>
+    </div>
+    <div class="card">
+    <h2>Status History Timeline (Last 10)</h2>
+    <div id="history-log"><p class="muted">Loading history...</p></div>
+    </div>
+    </div>
+    <div id="tiersPage" class="page">
+    <div class="card">
+    <h2>My Tier & Progress</h2>
+    <div id="my-plan-details"><p class="muted">Loading your plan details...</p></div>
+    </div>
+    <div class="card">
+    <div id="my-plan-progress"><p class="muted">Loading your achievement progress...</p></div>
+    </div>
+    <div class="card">
+    <h2>All Tiers & Benefits</h2>
+    <div id="all-tiers-info"><p class="muted">Loading all tiers...</p></div>
+    </div>
+    </div>
+    <div id="adminPage" class="page">
+    <div class="card">
+    <h2>👑 Admin Panel</h2>
+    <p class="muted">Manage users and verification requests.</p>
+    </div>
+    <div class="card">
+    <h2>Verification Requests</h2>
+    <div id="admin-verification-requests"><p class="muted">Loading requests...</p></div>
+    </div>
+    <div class="card">
+    <h2>All Users</h2>
+    <div id="admin-all-users" style="max-height: 400px; overflow-y: auto;"><p class="muted">Loading users...</p></div>
+    </div>
+    </div>
+    <div id="settingsPage" class="page">
+    <div class="card">
+    <h2>Profile Settings</h2>
+    <div class="form-group">
+    <label for="display-name">Display Name</label>
+    <input type="text" id="display-name">
+    </div>
+    <div class="form-group">
+    <label for="themeSelect">Theme</label>
+    <select id="themeSelect">
+    <option value="auto">Auto (Day/Night)</option>
+    <option value="light">Light</option>
+    <option value="dark">Dark</option>
+    </select>
+    </div>
+    <div class="form-group" id="font-customization-field">
+    <label for="display-font">Display Name Font</label>
+    <select id="display-font">
+    <option value="Inter, sans-serif">Inter (Default)</option>
+    <option value="Poppins, sans-serif">Poppins</option>
+    <option value="Roboto Mono, monospace">Roboto Mono</option>
+    <option value="Playfair Display, serif">Playfair Display</option>
+    </select>
+    </div>
+    </div>
+    <div class="card">
+    <h2>Personal Info</h2>
+    <div class="form-group">
+    <label for="bio">Short Bio / Tagline</label>
+    <textarea id="bio" placeholder="A brief description of yourself."></textarea>
+    </div>
+    <div class="form-group">
+    <label for="birthday">Birthday</label>
+    <input type="date" id="birthday">
+    </div>
+    <div class="form-group">
+    <label for="country-search">Country</label>
+    <div class="country-select-wrapper">
+    <input type="text" id="country-search" placeholder="Search for a country...">
+    <div id="country-dropdown" class="country-dropdown hidden"></div>
+    </div>
+    <input type="hidden" id="country-code">
+    </div>
+    <div class="form-group">
+    <label for="phone-number">Public Phone Number</label>
+    <input type="tel" id="phone-number" placeholder="+1 (555) 123-4567">
+    </div>
+    <div class="form-group" id="scheduling-link-field">
+    <label for="scheduling-link">Scheduling Link (e.g., Calendly)</label>
+    <input type="url" id="scheduling-link" placeholder="https://calendly.com/yourname">
+    </div>
+    </div>
+    <div class="card">
+    <h2>Visual Customization</h2>
+    <div class="form-group" id="pfp-url-group">
+    <label for="pfp-url">Profile Picture URL</label>
+    <input type="url" id="pfp-url" placeholder="https://example.com/image.png">
+    </div>
+    <div class="form-group" id="accent-color-field">
+    <label for="accent-color">Profile Accent Color</label>
+    <input type="color" id="accent-color" value="#0ea5e9">
+    </div>
+    <div class="form-group" id="link-text-color-field">
+    <label for="link-text-color">Custom Link Text Color</label>
+    <input type="color" id="link-text-color" value="#0369a1">
+    </div>
+    </div>
+    
+    <div class="card">
+    <h2>Update Status</h2>
+    <p class="muted">This status will be updated automatically if you connect your Google Calendar.</p>
+    <div class="form-group">
+    <label for="status-emoji">Current Status</label>
+    <select id="status-emoji">
+    <option value="🟢">🟢 Available</option>
+    <option value="💻">💻 Busy</option>
+    <option value="🧠">🧠 Deep Work</option>
+    <option value="🚗">🚗 Commuting</option>
+    <option value="☕">☕ On a Break</option>
+    <option value="🔴">🔴 Do Not Disturb</option>
+    <option value="📚">📚 School/Study</option>
+    <option value="🏖️">🏖️ Vacation/OOO</option>
+    <option value="😴">😴 Offline/Sleeping</option>
+    <option value="🍽️">🍽️ Meal Time</option>
+    <option value="🏋️">🏋️ Working Out</option>
+    <option value="🎮">🎮 Gaming</option>
+    <option value="✈️">✈️ Traveling</option>
+    </select>
+    </div>
+    <div class="form-group">
+    <label for="status-message">Message</label>
+    <input type="text" id="status-message" placeholder="e.g., Drafting 2026 Strategy">
+    </div>
+    </div>
 
+    <div class="card hidden" id="integrations-card">
+        <h2>Integrations</h2>
+        <p>Connect your HAP to other services for automatic status updates.</p>
+        <div id="gcal-integration-section">
+            <button id="connect-gcal-btn" class="btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M10.875 7.75a.75.75 0 0 0-1.5 0v1.5h-1.5a.75.75 0 0 0 0 1.5h1.5v1.5a.75.75 0 0 0 1.5 0v-1.5h1.5a.75.75 0 0 0 0-1.5h-1.5v-1.5Z"/><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM1.5 8a6.5 6.5 0 1 1 13 0 6.5 6.5 0 0 1-13 0Z"/></svg>
+                <span class="btn-text">Connect Google Calendar</span>
+            </button>
+            <button id="disconnect-gcal-btn" class="btn secondary hidden" style="background-color: #ef4444; color: white;">
+                <span class="btn-text">Disconnect Google Calendar</span>
+            </button>
+            <p id="gcal-status-text" class="muted" style="margin-top: 15px;"></p>
+        </div>
+        <div id="gcal-customization-fields" class="hidden" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+            <h3>Calendar Sync Settings</h3>
+            <div class="form-group">
+                <label for="gcal-busy-status">When an event makes you 'Busy', set status to:</label>
+                <select id="gcal-busy-status"></select>
+            </div>
+            <div class="form-group">
+                <label for="gcal-free-status">During 'Free' time, set status to:</label>
+                <select id="gcal-free-status"></select>
+            </div>
+            <div id="gemini-ai-sync-section" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <h3>✨ AI-Powered Status Sync</h3>
+                <p class="muted">Paste your calendar agenda for today below. The AI will analyze it to determine your current status, stripping any private details.</p>
+                <div class="form-group">
+                    <label for="calendar-input-for-ai">Today's Calendar Events</label>
+                    <textarea id="calendar-input-for-ai" placeholder="e.g., 9:00 AM - 10:00 AM: Project Phoenix sync with Alice\n12:30 PM - 1:00 PM: Lunch at Mom's place" style="min-height: 120px;"></textarea>
+                </div>
+                <button id="gemini-sync-btn" class="btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5z"/></svg>
+                    <span class="btn-text">Analyze with Gemini AI & Update Status</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+    <h2>Custom Links</h2>
+    <div id="custom-links-container"></div>
+    </div>
+    <div class="card">
+    <h2>Verification</h2>
+    <div id="verification-section"></div>
+    </div>
+    <div class="card hidden" id="custom-ads-settings-card">
+        <h2>Promotional Blocks 📢</h2>
+        <p class="muted">As a Pro tier member or higher, you can display your own custom content on your public profile.</p>
+        <div class="form-group">
+            <label for="ads-enabled-toggle">Display Custom Blocks</label>
+            <select id="ads-enabled-toggle">
+            <option value="false">Disabled</option>
+            <option value="true">Enabled</option>
+            </select>
+        </div>
+        <div id="ad-customization-fields" class="hidden">
+            <h3 style="margin-top: 30px;">Top Block (Image Banner)</h3>
+            <div class="form-group">
+            <label for="top-ad-image-url">Image URL</label>
+            <input type="url" id="top-ad-image-url" placeholder="https://example.com/banner.png">
+            </div>
+            <div class="form-group">
+            <label for="top-ad-link-url">Target URL (when banner is clicked)</label>
+            <input type="url" id="top-ad-link-url" placeholder="https://your-project.com">
+            </div>
+            <h3 style="margin-top: 30px;">Bottom Block (Text)</h3>
+            <div class="form-group">
+            <label for="bottom-ad-text">Text Content</label>
+            <input type="text" id="bottom-ad-text" placeholder="Check out my new project!">
+            </div>
+            <div class="form-group">
+            <label for="bottom-ad-link-url">Target URL (when text is clicked)</label>
+            <input type="url" id="bottom-ad-link-url" placeholder="https://your-other-project.com">
+            </div>
+        </div>
+    </div>
+    <div class="card hidden" id="platform-ad-settings-card">
+        <h2>Platform Ad Settings</h2>
+        <p class="muted">As a Max tier user, you can control the visibility of the default 'Join HAP' promotion on your profile.</p>
+        <div class="form-group">
+            <label for="platform-ad-toggle">"Join HAP" Promotion</label>
+            <select id="platform-ad-toggle">
+                <option value="off">Disabled</option>
+                <option value="top">Show at Top</option>
+                <option value="bottom">Show at Bottom</option>
+                <option value="both">Show at Top & Bottom</option>
+            </select>
+        </div>
+    </div>
+    <div class="card">
+    <button id="save-settings-btn" class="btn"><span class="btn-text">Save All Changes</span></button>
+    <button id="logout-btn" class="btn secondary" style="margin-top: 12px;"><span class="btn-text">Logout</span></button>
+    <button id="delete-account-btn" class="btn" style="margin-top: 20px; background-color: #ef4444; color: white;"><span class="btn-text">Delete My Account Permanently</span></button>
+    </div>
+    </div>
+    </div>
+    <footer>
+    <p>&copy; 2025 HAP | A Demo Project</p>
+    </footer>
+    <div id="toast"></div>
+    
+    <div id="tier-upgrade-modal" class="tier-upgrade-modal">
+        <div class="upgrade-modal-content">
+            <div id="upgrade-gift-stage">
+                <h2>You've Been Promoted!</h2>
+                <p>Click the gift to reveal your new perks!</p>
+                <div id="gift-box-icon" class="gift-box">🎁</div>
+            </div>
+            <div id="upgrade-results-stage" class="upgrade-results">
+                <h2>Welcome to <span id="new-tier-name"></span>!</h2>
+                <p>You've unlocked these new features:</p>
+                <div id="unlocked-features-list"></div>
+                <button id="close-upgrade-modal-btn" class="btn" style="margin-top: 20px;"><span class="btn-text">Awesome!</span></button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { 
+    getAuth, 
+    GoogleAuthProvider, 
+    signInWithPopup, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    onAuthStateChanged, 
+    signOut,
+    deleteUser,
+    updateProfile
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { 
+    getDatabase, 
+    ref, 
+    set, 
+    get, 
+    update,
+    push, 
+    query, 
+    orderByKey, 
+    limitToLast,
+    onValue
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { GoogleGenAI, Type } from "@google/genai";
+    import QRCode from 'qrcode';
+
+    // --- PASTE YOUR FIREBASE CONFIGURATION HERE ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyChwjwXFgIj9f64zGeIoS-q_odZm2ogFMw",
+        authDomain: "happp-96438.firebaseapp.com",
+        databaseURL: "https://happp-96438-default-rtdb.firebaseio.com",
+        projectId: "happp-96438",
+        storageBucket: "happp-96438.appspot.com",
+        messagingSenderId: "703348367691",
+        appId: "1:703348367691:web:376cd50d08d94bccf588ce"
+    };
+    
+    // Gemini API Configuration
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    
+    window.onerror = function(message, source, lineno, colno, error) {
+    const errorDiv = document.getElementById('global-error-display');
+    if (errorDiv) {
+    errorDiv.style.display = 'block';
+    errorDiv.textContent = `CRITICAL ERROR: ${message} (Line ${lineno})`;
+    }
+    console.error("Global Error Caught:", message, source, lineno, colno, error);
+    return false;
+    };
+    
+    function hideLoadingOverlay() {
+        const loader = document.getElementById('loading-overlay');
+        if (loader) {
+            loader.classList.add('hidden');
+        }
+    }
+    
+    let countdownInterval;
+    let isPublicView = false;
+    let publicViewInterval = null;
+    let isAuthResolved = false;
+    let timetableListener = null;
+    
+    const App = {
+    pages: ['loginPage', 'profilePage', 'searchPage', 'analyticsPage', 'settingsPage', 'tiersPage', 'adminPage'],
+    elements: {},
+    currentUser: null,
+    currentProfileData: null,
+    };
+    
+    const USER_TIER_CONFIG = {
+      'Member': { 
+        name: 'Basic', linkLimit: 1, pfp: false, qrCode: false, customFont: false, customColor: false, 
+        scheduling: false, analytics: 'limited', verification: false, gcalIntegration: false,
+        canCustomizeAds: false, canControlPlatformAd: false
+      },
+      'Plus': { 
+        name: 'Personal', linkLimit: 3, pfp: true, qrCode: true, customFont: true, customColor: true, 
+        scheduling: false, analytics: true, verification: false, gcalIntegration: true,
+        canCustomizeAds: false, canControlPlatformAd: false
+      },
+      'Pro': { 
+        name: 'Professional', linkLimit: 5, pfp: true, qrCode: true, customFont: true, customColor: true, 
+        scheduling: false, analytics: true, verification: true, gcalIntegration: true,
+        canCustomizeAds: true, canControlPlatformAd: false
+      },
+      'Max': { 
+        name: 'Power User', linkLimit: 10, pfp: true, qrCode: true, customFont: true, customColor: true, 
+        scheduling: true, analytics: true, verification: true, gcalIntegration: true,
+        canCustomizeAds: true, canControlPlatformAd: true 
+      },
+      'Owner': {
+        name: 'Owner', linkLimit: 10, pfp: true, qrCode: true, customFont: true, customColor: true, 
+        scheduling: true, analytics: true, verification: true, gcalIntegration: true,
+        canCustomizeAds: true, canControlPlatformAd: true
+      },
+    };
+    
+    const ACHIEVEMENT_CONFIG = {
+      toPlus: [
+        { id: 'profileComplete', label: 'The Basics: Fill in Bio, Birthday, and Country', goal: 1 },
+        { id: 'expressive', label: 'Express Yourself: Use 3 different statuses', goal: 3 },
+        { id: 'socialButterfly', label: 'Branch Out: Add your first custom link', goal: 1 },
+        { id: 'loyalUser', label: 'Getting Started: Log in on 3 different days', goal: 3 },
+        { id: 'firstShare', label: 'Go Public: Share your profile for the first time', goal: 1 }
+      ],
+      toPro: [
+        { id: 'views', label: 'Getting Noticed: Get 50 profile views', goal: 50 },
+        { id: 'picturePerfect', label: 'Picture Perfect: Add a custom profile picture', goal: 1 },
+        { id: 'loyalUser', label: 'Week-Long Streak: Log in on 7 different days', goal: 7 },
+        { id: 'expressive', label: 'Mood Changer: Use 5 different statuses', goal: 5 }
+      ],
+      toMax: [
+        { id: 'views', label: 'Local Celebrity: Get 150 profile views', goal: 150 },
+        { id: 'referral', label: 'Community Builder: Have someone join using your link', goal: 1 },
+        { id: 'loyalUser', label: 'Consistent Presence: Log in on 30 different days', goal: 30 },
+        { id: 'expressive', label: 'Status Guru: Use 10 different statuses', goal: 10 }
+      ]
+    };
+    
+    const FEATURE_FRIENDLY_NAMES = {
+        pfp: "Custom Profile Picture",
+        qrCode: "Profile QR Code Sharing",
+        customFont: "Custom Profile Font",
+        customColor: "Custom Profile Colors",
+        scheduling: "Scheduling Link Display",
+        analytics: "Profile Analytics",
+        verification: "Verification Eligibility",
+        canCustomizeAds: "Custom Promotional Blocks",
+        canControlPlatformAd: "Platform Ad Controls",
+        gcalIntegration: "Google Calendar Sync"
+    };
+    
+    const VERIFICATION_QUESTIONS = [
+    "What is the primary purpose of your HAP profile? (e.g., professional networking, personal status, team coordination)",
+    "Please provide a link to an existing public profile that can help verify your identity (e.g., LinkedIn, Twitter, personal website, or official company page).",
+    "What is your full legal name?",
+    "Briefly describe why you should be granted a verified status on this platform.",
+    "Please provide a contact email or phone number that we can use to follow up on this verification request (this will be kept private)."
+    ];
+    
+    const COUNTRY_LIST = [ {name: "Afghanistan", code: "AF"}, {name: "Åland Islands", code: "AX"}, {name: "Albania", code: "AL"}, {name: "Algeria", code: "DZ"}, {name: "American Samoa", code: "AS"}, {name: "Andorra", code: "AD"}, {name: "Angola", code: "AO"}, {name: "Anguilla", code: "AI"}, {name: "Antarctica", code: "AQ"}, {name: "Antigua and Barbuda", code: "AG"}, {name: "Argentina", code: "AR"}, {name: "Armenia", code: "AM"}, {name: "Aruba", code: "AW"}, {name: "Australia", code: "AU"}, {name: "Austria", code: "AT"}, {name: "Azerbaijan", code: "AZ"}, {name: "Bahamas", code: "BS"}, {name: "Bahrain", code: "BH"}, {name: "Bangladesh", code: "BD"}, {name: "Barbados", code: "BB"}, {name: "Belarus", code: "BY"}, {name: "Belgium", code: "BE"}, {name: "Belize", code: "BZ"}, {name: "Benin", code: "BJ"}, {name: "Bermuda", code: "BM"}, {name: "Bhutan", code: "BT"}, {name: "Bolivia", code: "BO"}, {name: "Bosnia and Herzegovina", code: "BA"}, {name: "Botswana", code: "BW"}, {name: "Bouvet Island", code: "BV"}, {name: "Brazil", code: "BR"}, {name: "British Indian Ocean Territory", code: "IO"}, {name: "Brunei Darussalam", code: "BN"}, {name: "Bulgaria", code: "BG"}, {name: "Burkina Faso", code: "BF"}, {name: "Burundi", code: "BI"}, {name: "Cambodia", code: "KH"}, {name: "Cameroon", code: "CM"}, {name: "Canada", code: "CA"}, {name: "Cape Verde", code: "CV"}, {name: "Cayman Islands", code: "KY"}, {name: "Central African Republic", code: "CF"}, {name: "Chad", code: "TD"}, {name: "Chile", code: "CL"}, {name: "China", code: "CN"}, {name: "Christmas Island", code: "CX"}, {name: "Cocos (Keeling) Islands", code: "CC"}, {name: "Colombia", code: "CO"}, {name: "Comoros", code: "KM"}, {name: "Congo", code: "CG"}, {name: "Congo, The Democratic Republic of the", code: "CD"}, {name: "Cook Islands", code: "CK"}, {name: "Costa Rica", code: "CR"}, {name: "Cote D'Ivoire", code: "CI"}, {name: "Croatia", code: "HR"}, {name: "Cuba", code: "CU"}, {name: "Cyprus", code: "CY"}, {name: "Czech Republic", code: "CZ"}, {name: "Denmark", code: "DK"}, {name: "Djibouti", code: "DJ"}, {name: "Dominica", code: "DM"}, {name: "Dominican Republic", code: "DO"}, {name: "Ecuador", code: "EC"}, {name: "Egypt", code: "EG"}, {name: "El Salvador", code: "SV"}, {name: "Equatorial Guinea", code: "GQ"}, {name: "Eritrea", code: "ER"}, {name: "Estonia", code: "EE"}, {name: "Ethiopia", code: "ET"}, {name: "Falkland Islands (Malvinas)", code: "FK"}, {name: "Faroe Islands", code: "FO"}, {name: "Fiji", code: "FJ"}, {name: "Finland", code: "FI"}, {name: "France", code: "FR"}, {name: "French Guiana", code: "GF"}, {name: "French Polynesia", code: "PF"}, {name: "French Southern Territories", code: "TF"}, {name: "Gabon", code: "GA"}, {name: "Gambia", code: "GM"}, {name: "Georgia", code: "GE"}, {name: "Germany", code: "DE"}, {name: "Ghana", code: "GH"}, {name: "Gibraltar", code: "GI"}, {name: "Greece", code: "GR"}, {name: "Greenland", code: "GL"}, {name: "Grenada", code: "GD"}, {name: "Guadeloupe", code: "GP"}, {name: "Guam", code: "GU"}, {name: "Guatemala", code: "GT"}, {name: "Guernsey", code: "GG"}, {name: "Guinea", code: "GN"}, {name: "Guinea-Bissau", code: "GW"}, {name: "Guyana", code: "GY"}, {name: "Haiti", code: "HT"}, {name: "Heard Island and Mcdonald Islands", code: "HM"}, {name: "Holy See (Vatican City State)", code: "VA"}, {name: "Honduras", code: "HN"}, {name: "Hong Kong", code: "HK"}, {name: "Hungary", code: "HU"}, {name: "Iceland", code: "IS"}, {name: "India", code: "IN"}, {name: "Indonesia", code: "ID"}, {name: "Iran, Islamic Republic Of", code: "IR"}, {name: "Iraq", code: "IQ"}, {name: "Ireland", code: "IE"}, {name: "Isle of Man", code: "IM"}, {name: "Israel", code: "IL"}, {name: "Italy", code: "IT"}, {name: "Jamaica", code: "JM"}, {name: "Japan", code: "JP"}, {name: "Jersey", code: "JE"}, {name: "Jordan", code: "JO"}, {name: "Kazakhstan", code: "KZ"}, {name: "Kenya", code: "KE"}, {name: "Kiribati", code: "KI"}, {name: "Korea, Democratic People'S Republic of", code: "KP"}, {name: "Korea, Republic of", code: "KR"}, {name: "Kuwait", code: "KW"}, {name: "Kyrgyzstan", code: "KG"}, {name: "Lao People'S Democratic Republic", code: "LA"}, {name: "Latvia", code: "LV"}, {name: "Lebanon", code: "LB"}, {name: "Lesotho", code: "LS"}, {name: "Liberia", code: "LR"}, {name: "Libyan Arab Jamahiriya", code: "LY"}, {name: "Liechtenstein", code: "LI"}, {name: "Lithuania", code: "LT"}, {name: "Luxembourg", code: "LU"}, {name: "Macao", code: "MO"}, {name: "Macedonia, The Former Yugoslav Republic of", code: "MK"}, {name: "Madagascar", code: "MG"}, {name: "Malawi", code: "MW"}, {name: "Malaysia", code: "MY"}, {name: "Maldives", code: "MV"}, {name: "Mali", code: "ML"}, {name: "Malta", code: "MT"}, {name: "Marshall Islands", code: "MH"}, {name: "Mauritania", code: "MR"}, {name: "Mauritius", code: "MU"}, {name: "Mayotte", code: "YT"}, {name: "Mexico", code: "MX"}, {name: "Micronesia, Federated States of", code: "FM"}, {name: "Moldova, Republic of", code: "MD"}, {name: "Monaco", code: "MC"}, {name: "Mongolia", code: "MN"}, {name: "Montserrat", code: "MS"}, {name: "Morocco", code: "MA"}, {name: "Mozambique", code: "MZ"}, {name: "Myanmar", code: "MM"}, {name: "Namibia", code: "NA"}, {name: "Nauru", code: "NR"}, {name: "Nepal", code: "NP"}, {name: "Netherlands", code: "NL"}, {name: "Netherlands Antilles", code: "AN"}, {name: "New Caledonia", code: "NC"}, {name: "New Zealand", code: "NZ"}, {name: "Nicaragua", code: "NI"}, {name: "Niger", code: "NE"}, {name: "Nigeria", code: "NG"}, {name: "Niue", code: "NU"}, {name: "Norfolk Island", code: "NF"}, {name: "Northern Mariana Islands", code: "MP"}, {name: "Norway", code: "NO"}, {name: "Oman", code: "OM"}, {name: "Pakistan", code: "PK"}, {name: "Palau", code: "PW"}, {name: "Palestinian Territory, Occupied", code: "PS"}, {name: "Panama", code: "PA"}, {name: "Papua New Guinea", code: "PG"}, {name: "Paraguay", code: "PY"}, {name: "Peru", code: "PE"}, {name: "Philippines", code: "PH"}, {name: "Pitcairn", code: "PN"}, {name: "Poland", code: "PL"}, {name: "Portugal", code: "PT"}, {name: "Puerto Rico", code: "PR"}, {name: "Qatar", code: "QA"}, {name: "Reunion", code: "RE"}, {name: "Romania", code: "RO"}, {name: "Russian Federation", code: "RU"}, {name: "Rwanda", code: "RW"}, {name: "Saint Helena", code: "SH"}, {name: "Saint Kitts and Nevis", code: "KN"}, {name: "Saint Lucia", code: "LC"}, {name: "Saint Pierre and Miquelon", code: "PM"}, {name: "Saint Vincent and the Grenadines", code: "VC"}, {name: "Samoa", code: "WS"}, {name: "San Marino", code: "SM"}, {name: "Sao Tome and Principe", code: "ST"}, {name: "Saudi Arabia", code: "SA"}, {name: "Senegal", code: "SN"}, {name: "Serbia and Montenegro", code: "CS"}, {name: "Seychelles", code: "SC"}, {name: "Sierra Leone", code: "SL"}, {name: "Singapore", code: "SG"}, {name: "Slovakia", code: "SK"}, {name: "Slovenia", code: "SI"}, {name: "Solomon Islands", code: "SB"}, {name: "Somalia", code: "SO"}, {name: "South Africa", code: "ZA"}, {name: "South Georgia and the South Sandwich Islands", code: "GS"}, {name: "Spain", code: "ES"}, {name: "Sri Lanka", code: "LK"}, {name: "Sudan", code: "SD"}, {name: "Suriname", code: "SR"}, {name: "Svalbard and Jan Mayen", code: "SJ"}, {name: "Swaziland", code: "SZ"}, {name: 'Sweden', code: 'SE'}, {name: 'Switzerland', code: 'CH'}, {name: 'Syrian Arab Republic', code: 'SY'}, {name: 'Taiwan', code: 'TW'}, {name: 'Tajikistan', code: 'TJ'}, {name: 'Tanzania, United Republic of', code: 'TZ'}, {name: 'Thailand', code: 'TH'}, {name: 'Timor-Leste', code: 'TL'}, {name: 'Togo', code: 'TG'}, {name: 'Tokelau', code: 'TK'}, {name: 'Tonga', code: 'TO'}, {name: 'Trinidad and Tobago', code: 'TT'}, {name: 'Tunisia', code: 'TN'}, {name: 'Turkey', code: 'TR'}, {name: 'Turkmenistan', code: 'TM'}, {name: 'Turks and Caicos Islands', code: 'TC'}, {name: 'Tuvalu', code: 'TV'}, {name: 'Uganda', code: 'UG'}, {name: 'Ukraine', code: 'UA'}, {name: 'United Arab Emirates', code: 'AE'}, {name: 'United Kingdom', code: 'GB'}, {name: 'United States', code: 'US'}, {name: 'United States Minor Outlying Islands', code: 'UM'}, {name: 'Uruguay', code: 'UY'}, {name: 'Uzbekistan', code: 'UZ'}, {name: 'Vanuatu', code: 'VU'}, {name: 'Venezuela', code: 'VE'}, {name: 'Viet Nam', code: 'VN'}, {name: 'Virgin Islands, British', code: 'VG'}, {name: 'Virgin Islands, U.S.', code: 'VI'}, {name: 'Wallis and Futuna', code: 'WF'}, {name: 'Western Sahara', code: 'EH'}, {name: 'Yemen', code: 'YE'}, {name: 'Zambia', code: 'ZM'}, {name: 'Zimbabwe', code: 'ZW'} ];
+
+    function showToast(message, type = 'info') {
+    const toast = App.elements.toast;
+    if (!toast) return;
+    toast.textContent = message;
+    toast.style.backgroundColor = type === 'error' ? '#ef4444' : '#0f172a';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function timeToMinutes(timeStr) {
+    if (!timeStr || !timeStr.includes(':')) return 0;
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes;
+    }
+
+    function getCountryFlagEmoji(countryCode) {
+    if (!countryCode || countryCode.length !== 2) return '';
+    const codePoints = countryCode.toUpperCase().split('').map(char => 127397 + char.charCodeAt());
+    return String.fromCodePoint(...codePoints);
+    }
+
+    function getLocalTimeData() {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    const offsetMinutes = now.getTimezoneOffset() * -1;
+    const sign = offsetMinutes >= 0 ? '+' : '-';
+    const absOffset = Math.abs(offsetMinutes);
+    const hours = String(Math.floor(absOffset / 60)).padStart(2, '0');
+    const minutes = String(absOffset % 60).padStart(2, '0');
+    const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return { time: timeStr, offset: `UTC${sign}${hours}:${minutes}`, hour: now.getHours(), timeZone: tzName };
+    }
+
+    function getFriendlyAuthError(errorCode) {
+    switch (errorCode) {
+    case 'auth/invalid-credential':
+    case 'auth/wrong-password':
+    return 'Invalid email or password. Please try again.';
+    case 'auth/email-already-in-use':
+    return 'An account with this email already exists.';
+    case 'auth/weak-password':
+    return 'Your password must be at least 6 characters long.';
+    default:
+    return 'An unexpected error occurred. Please try again.';
+    }
+    }
+
+    async function handleEmailSignup(e) {
+    e.preventDefault();
+    const name = document.getElementById('signup-name').value.trim();
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value;
+    if (!name || !email || password.length < 6) { return; }
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(result.user, { displayName: name });
+      await initializeNewUser(result.user, { displayName: name });
+    } catch (error) {
+      document.getElementById('error-message').textContent = getFriendlyAuthError(error.code);
+    }
+    }
+    
+    async function handleGoogleLogin() {
+    const provider = new GoogleAuthProvider();
+    try {
+        const result = await signInWithPopup(auth, provider);
+        await initializeNewUser(result.user);
+    } catch (error) {
+      document.getElementById('error-message').textContent = getFriendlyAuthError(error.code);
+    }
+    }
+    
+    async function handleEmailLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      document.getElementById('error-message').textContent = getFriendlyAuthError(error.code);
+    }
+    }
+    
+    function handleLogout() {
+    signOut(auth);
+    }
+    
+    onAuthStateChanged(auth, async (user) => {
+        const wasLoggedIn = !!App.currentUser;
+        try {
+            if (user) {
+                await setupSession(user.uid);
+                App.currentUser = { email: user.email, displayName: user.displayName, userId: user.uid };
+            } else {
+                App.currentUser = null;
+                App.currentProfileData = null;
+            }
+        } catch (error) {
+            console.error("Error during auth state change or session setup:", error);
+            showToast('Failed to load your session. Please log in.', 'error');
+            App.currentUser = null;
+            App.currentProfileData = null;
+        } finally {
+            if (!isAuthResolved) {
+                isAuthResolved = true;
+                hashChangeRouter();
+            } else if (!!App.currentUser !== wasLoggedIn) {
+                hashChangeRouter();
+            }
+        }
+    });
+
+    async function initializeNewUser(user, additionalData = {}) {
+    const userRef = ref(db, `users/${user.uid}`);
+    const snapshot = await get(userRef);
+    if (!snapshot.exists()) {
+    const today = new Date().toISOString().split('T')[0];
+    const displayName = additionalData.displayName || user.displayName || "New User";
+    const defaultPfpText = displayName.charAt(0).toUpperCase();
+    const initialProfile = { 
+    displayName: displayName, 
+    email: user.email, 
+    createdAt: new Date().toISOString(),
+    status: '🟢', 
+    message: 'Just getting started!', 
+    theme: 'auto', 
+    membershipTier: 'Member',
+    verified: false,
+    pfpText: defaultPfpText,
+    adsEnabled: false,
+    platformAdDisplay: 'both',
+    gcalSettings: {
+      busyStatus: '💻',
+      freeStatus: '🟢'
+    },
+    achievements: { 
+    profileComplete: 0, socialButterfly: 0, firstShare: 0,
+    views: 0, loyalUser: 1, expressive: 0, referral: 0, picturePerfect: 0,
+    loginHistory: { [today]: true },
+    usedEmojis: {}
+    }, 
+    updatedAt: new Date().toISOString(),
+    ...additionalData
+    };
+    await set(userRef, initialProfile);
+    
+    const referrerId = sessionStorage.getItem('referrerId');
+    if (referrerId && referrerId !== user.uid) {
+    const referrerRef = ref(db, `users/${referrerId}/achievements/referral`);
+    const referrerSnap = await get(referrerRef);
+    await set(referrerRef, (referrerSnap.val() || 0) + 1);
+    sessionStorage.removeItem('referrerId');
+    }
+    }
+    }
+    
+    async function setupSession(userId) {
+    if (!userId) return;
+    
+    const userRef = ref(db, `users/${userId}`);
+    const userSnap = await get(userRef);
+    
+    if (userSnap.exists()) {
+    const data = userSnap.val();
+    data.userId = userId; 
+    App.currentProfileData = data;
+    
+    const today = new Date().toISOString().split('T')[0];
+    const loginHistory = data.achievements?.loginHistory || {};
+    if (!loginHistory[today]) {
+    const updates = {};
+    updates[`achievements/loginHistory/${today}`] = true;
+    updates['achievements/loyalUser'] = Object.keys(loginHistory).length + 1;
+    await update(userRef, updates);
+    App.currentProfileData.achievements.loyalUser = updates['achievements/loyalUser'];
+    App.currentProfileData.achievements.loginHistory = {...loginHistory, [today]: true};
+    }
+    
+    applyVisuals(data);
+    populateSettings(data);
+    
+    document.querySelector('#mainHeader').innerHTML = `
+    <nav>
+    <button class="nav-btn" data-page="profilePage"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5a5.5 5.5 0 0 1 3.096 10.047 9.005 9.005 0 0 1 5.9 8.181.75.75 0 0 1-1.498.07 7.502 7.502 0 0 0-15 0 .75.75 0 0 1-1.498-.07A9.005 9.005 0 0 1 9 12.55a5.5 5.5 0 0 1 3-10.05ZM12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"></path></svg><span>Profile</span></button>
+    <button class="nav-btn" data-page="tiersPage"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.47 1.72a.75.75 0 0 1 1.06 0l3 3a.75.75 0 0 1-1.06 1.06l-1.72-1.72V7.5h-1.5V4.06L9.53 5.78a.75.75 0 0 1-1.06-1.06l3-3ZM11.25 7.5V15a.75.75 0 0 0 1.5 0V7.5h3.75a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3h3.75Z"></path></svg><span>Tiers</span></button>
+    <button class="nav-btn" data-page="searchPage"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd"></path></svg><span>Search</span></button>
+    <button id="analytics-nav-btn" class="nav-btn" data-page="analyticsPage"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.5 4.5a.75.75 0 0 0-1.5 0V7.5a.75.75 0 0 0 1.5 0V4.5ZM17.25 5.25a.75.75 0 0 0-1.5 0V9a.75.75 0 0 0 1.5 0V5.25ZM14.25 7.5a.75.75 0 0 0-1.5 0v10.5a.75.75 0 0 0 1.5 0V7.5ZM21 9a.75.75 0 0 0-1.5 0v7.5a.75.75 0 0 0 1.5 0V9ZM3.75 12a.75.75 0 0 0-1.5 0v4.5a.75.75 0 0 0 1.5 0V12Z"></path><path fill-rule="evenodd" d="M3 3a1.5 1.5 0 0 0-1.5 1.5V19.5A1.5 1.5 0 0 0 3 21h18a1.5 1.5 0 0 0 1.5-1.5V4.5A1.5 1.5 0 0 0 21 3H3ZM5.25 19.5h13.5V4.5H5.25v15Z" clip-rule="evenodd"></path></svg><span>Analytics</span></button>
+    <button class="nav-btn" data-page="settingsPage"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.64 3.023a.75.75 0 0 1 .72 0l1.517.65a.75.75 0 0 0 .841-.252l1.11-1.48A.75.75 0 0 1 17 2.25a.75.75 0 0 1 .633.368l1.11 1.48a.75.75 0 0 0 .84.253l1.518-.65a.75.75 0 0 1 .72 0l1.016.436a.75.75 0 0 1 .45 1.033l-.74 1.385a.75.75 0 0 0 .14.925l1.28.96a.75.75 0 0 1 0 1.302l-1.28.96a.75.75 0 0 0-.14.925l.74 1.385a.75.75 0 0 1-.45 1.033l-1.017.436a.75.75 0 0 1-.72 0l-1.517-.65a.75.75 0 0 0-.84.252l-1.11 1.48A.75.75 0 0 1 17 21.75a.75.75 0 0 1-.633-.368l-1.11-1.48a.75.75 0 0 0-.84-.253l-1.518.65a.75.75 0 0 1-.72 0l-1.016-.436a.75.75 0 0 1-.45-1.033l.74-1.385a.75.75 0 0 0-.14-.925l-1.28-.96a.75.75 0 0 1 0-1.302l1.28.96a.75.75 0 0 0 .14-.925l-.74-1.385a.75.75 0 0 1 .45-1.033l1.017-.436ZM12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path></svg><span>Settings</span></button>
+    <button id="admin-nav-btn" class="nav-btn hidden" data-page="adminPage"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M4.5 2.25a.75.75 0 0 0 0 1.5v16.5a.75.75 0 0 0 0 1.5h15a.75.75 0 0 0 0-1.5V3.75a.75.75 0 0 0 0-1.5h-15ZM5.25 21a1.5 1.5 0 0 0 1.5-1.5V3.75A1.5 1.5 0 0 0 5.25 2.25h-1.5A3 3 0 0 0 .75 5.25v13.5A3 3 0 0 0 3.75 21h1.5Zm15-1.5V3.75A1.5 1.5 0 0 0 18.75 2.25h-1.5a.75.75 0 0 0 0 1.5h1.5c.414 0 .75.336.75.75v16.5c0 .414-.336.75-.75.75h-1.5a.75.75 0 0 0 0 1.5h1.5a3 3 0 0 0 3-3V5.25a3 3 0 0 0-3-3h-1.5ZM8.25 7.5a.75.75 0 0 0 0 1.5h7.5a.75.75 0 0 0 0-1.5h-7.5Zm.75 3.75a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" /></svg><span>Admin</span></button>
+    </nav>
+    `;
+    document.querySelector('#admin-nav-btn').classList.toggle('hidden', data.membershipTier !== 'Owner');
+
+    } else {
+    console.error("User account exists but no profile in users/ database. Logging out.");
+    handleLogout();
+    }
+    }
+    
+    async function displayPublicProfile(userId) {
+    try {
+    const userRef = ref(db, `users/${userId}`);
+    const snapshot = await get(userRef);
+    let userData = snapshot.val();
+    if (userData) {
+    userData.userId = userId;
+    applyVisuals(userData); 
+    renderProfile(userData);
+    if (!App.currentUser || App.currentUser.userId !== userId) {
+    trackProfileView(userId);
+    }
+    } else {
+    document.body.className = '';
+    document.getElementById('profile-name').textContent = 'User Not Found';
+    document.getElementById('profile-emoji').textContent = '❌';
+    document.getElementById('profile-message').textContent = 'Profile is missing or deleted.';
+    }
+    } catch (error) {
+    document.getElementById('profile-name').textContent = 'Error loading profile.';
+    console.error("Error loading public profile:", error);
+    } finally {
+        hideLoadingOverlay();
+    }
+    }
+    
+    async function saveAndLogStatus(data) {
+        const dataWithTimestamp = { ...data, updatedAt: new Date().toISOString() };
+        const userRef = ref(db, `users/${App.currentUser.userId}`);
+        
+        if(data.displayName && data.displayName !== App.currentProfileData.displayName) {
+            await updateProfile(auth.currentUser, { displayName: data.displayName });
+            if (!data.pfpUrl) dataWithTimestamp.pfpText = data.displayName.charAt(0).toUpperCase();
+        }
+
+        const achievements = App.currentProfileData.achievements || {};
+        const achievementUpdates = {};
+
+        if(data.status){
+            const newEmoji = data.status;
+            const newUsedEmojis = achievements.usedEmojis || {};
+            if (!newUsedEmojis[newEmoji]) {
+                newUsedEmojis[newEmoji] = true;
+                achievementUpdates['achievements/usedEmojis'] = newUsedEmojis;
+                achievementUpdates['achievements/expressive'] = Object.keys(newUsedEmojis).length;
+            }
+        }
+
+        achievementUpdates['achievements/socialButterfly'] = data.links?.length || achievements.socialButterfly || 0;
+        achievementUpdates['achievements/picturePerfect'] = data.pfpUrl ? 1 : (achievements.picturePerfect || 0);
+        const isBasicProfileComplete = data.bio && data.birthday && data.countryCode;
+        achievementUpdates['achievements/profileComplete'] = isBasicProfileComplete ? 1 : 0;
+        
+        await update(userRef, { ...dataWithTimestamp, ...achievementUpdates });
+
+        if(data.status && data.message) {
+            const historyRef = ref(db, `history/${App.currentUser.userId}`);
+            await push(historyRef, { status: data.status, message: data.message, timestamp: dataWithTimestamp.updatedAt });
+        }
+        
+        const updatedSnapshot = await get(userRef);
+        const oldTier = App.currentProfileData.membershipTier;
+        App.currentProfileData = { ...updatedSnapshot.val(), userId: App.currentUser.userId };
+        await updateMembershipTier(App.currentUser.userId, App.currentProfileData, oldTier);
+
+        const finalSnapshot = await get(userRef);
+        App.currentProfileData = { ...finalSnapshot.val(), userId: App.currentUser.userId };
+
+        applyVisuals(App.currentProfileData);
+        renderProfile(App.currentProfileData);
+        populateSettings(App.currentProfileData);
+
+        if (oldTier === App.currentProfileData.membershipTier) {
+            showToast('Settings Saved & Status Updated! 💾');
+        }
+    }
+    
+    function navigateTo(pageId, isInternal = true) {
+    if(isInternal) {
+        const cleanUrl = window.location.origin + window.location.pathname;
+        history.pushState({}, '', cleanUrl);
+    }
+    window.location.hash = pageId;
+    }
+    
+    async function hashChangeRouter() {
+        if (Object.keys(App.elements).length === 0) {
+            App.pages.forEach(pId => App.elements[pId] = document.getElementById(pId));
+            App.elements.mainHeader = document.getElementById('mainHeader');
+            App.elements.toast = document.getElementById('toast');
+        }
+
+        clearInterval(countdownInterval);
+        if(publicViewInterval) clearInterval(publicViewInterval);
+        if(timetableListener) timetableListener(); // Detach old listener
+
+        const params = new URLSearchParams(window.location.search);
+        const userIdFromUrl = params.get('user');
+
+        if (userIdFromUrl) {
+            isPublicView = true;
+            App.pages.forEach(pId => App.elements[pId]?.classList.remove('active'));
+            document.body.style.paddingBottom = "20px";
+            App.elements.mainHeader?.classList.add('hidden');
+            App.elements.profilePage?.classList.add('active');
+            await displayPublicProfile(userIdFromUrl);
+            return;
+        }
+        
+        isPublicView = false;
+        document.body.style.paddingBottom = "100px";
+
+        const hash = window.location.hash.substring(1);
+
+        let targetPageId = 'loginPage'; 
+        
+        if (App.currentUser && App.currentProfileData) {
+            const userTier = App.currentProfileData.membershipTier || 'Member';
+            const tierConfig = USER_TIER_CONFIG[userTier];
+            const requestedPage = App.pages.includes(hash) ? hash : 'profilePage';
+
+            if (requestedPage === 'analyticsPage' && !tierConfig.analytics) {
+                targetPageId = 'profilePage';
+                showToast("Upgrade your tier to view analytics.", "error");
+            } else if (requestedPage === 'adminPage' && userTier !== 'Owner') {
+                targetPageId = 'profilePage';
+            } else {
+                targetPageId = requestedPage;
+            }
+        } else if (!App.currentUser) {
+            if (hash === 'searchPage') {
+                targetPageId = 'searchPage';
+            } else if (hash) {
+                sessionStorage.setItem('redirectAfterLogin', hash);
+                targetPageId = 'loginPage';
+            }
+        }
+
+        if (App.currentUser) {
+            if(targetPageId === 'profilePage') {
+                renderProfile(App.currentProfileData);
+            } else if (targetPageId === 'analyticsPage') {
+                await fetchAndRenderAnalytics();
+            } else if (targetPageId === 'tiersPage') {
+                renderTiersPage();
+            } else if (targetPageId === 'adminPage') {
+                renderAdminPanel();
+            }
+        }
+        
+        if (targetPageId === 'searchPage') {
+            document.getElementById('search-results-list').innerHTML = '<p class="muted">Search for users by name or click \'Search\' to view all public profiles.</p>';
+        }
+        
+        App.pages.forEach(pId => App.elements[pId]?.classList.toggle('active', pId === targetPageId));
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.page === targetPageId));
+        App.elements.mainHeader?.classList.toggle('hidden', !App.currentUser || targetPageId === 'loginPage');
+        window.scrollTo(0, 0);
+        hideLoadingOverlay();
+    }
+    
+    function applyVisuals(userData) {
+        if (!userData) return;
+        const theme = userData.theme || 'auto';
+        const timeData = getLocalTimeData();
+        const isNight = timeData.hour >= 20 || timeData.hour < 6;
+        document.body.className = (theme === 'dark' || (theme === 'auto' && isNight)) ? 'dark' : '';
+
+        const accent = userData?.profileAccentColor || '#0ea5e9';
+        document.documentElement.style.setProperty('--primary', accent);
+        document.documentElement.style.setProperty('--primary-dark', document.body.classList.contains('dark') ? '#7dd3fc' : '#0369a1');
+        document.documentElement.style.setProperty('--link-text-color', userData?.linkTextColor || '#0369a1');
+        document.documentElement.style.setProperty('--display-font', userData?.displayNameFont || 'Inter, sans-serif');
+
+        const pfpElement = document.getElementById('profile-pfp');
+        if (pfpElement) {
+            const tierConfig = USER_TIER_CONFIG[userData.membershipTier || 'Member'];
+            pfpElement.style.backgroundImage = 'none';
+            if (tierConfig.pfp && userData.pfpUrl) {
+                pfpElement.setAttribute('data-src', userData.pfpUrl);
+                pfpElement.textContent = '';
+            } else {
+                pfpElement.removeAttribute('data-src');
+                pfpElement.textContent = userData.pfpText || userData.displayName.charAt(0).toUpperCase();
+            }
+            pfpElement.style.backgroundColor = isNight ? '#1e293b' : 'var(--primary-light)';
+            pfpElement.style.borderColor = accent;
+        }
+    }
+    
+    function renderProfile(data) {
+        if (!data) return;
+        
+        const isOwnerViewing = App.currentUser && App.currentUser.userId === data.userId;
+
+        document.getElementById('share-profile-card').classList.remove('hidden');
+
+        const profileNameEl = document.getElementById('profile-name');
+        const membershipContainer = document.getElementById('membership-tier-display-container');
+        const name = data.displayName || 'Unnamed User';
+        profileNameEl.innerHTML = name;
+        const userVerifiedIcon = `<svg class="inline-verified-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.06-1.06l-3.103 3.103-1.53-1.53a.75.75 0 0 0-1.06 1.06l2.06 2.06a.75.75 0 0 0 1.06 0l3.64-3.64Z" clip-rule="evenodd" /></svg>`;
+        if (data.verified) profileNameEl.innerHTML += userVerifiedIcon;
+        const tier = data.membershipTier || 'Member';
+        const tierConfig = USER_TIER_CONFIG[tier];
+        profileNameEl.classList.toggle('is-owner', tier === 'Owner');
+        membershipContainer.innerHTML = `<div class="membership-badge tier-${tier}">${tierConfig.name || tier}</div>`;
+        document.getElementById('profile-emoji').textContent = data.status || '❓';
+        document.getElementById('profile-message').textContent = data.message || 'No message set.';
+        renderPersonalDetails(data);
+        const timeData = getLocalTimeData();
+        document.getElementById('local-time-info').textContent = `Local Time: ${timeData.time} (${timeData.offset})`;
+        renderCustomLinks(data.links, document.getElementById('profile-links'), tierConfig);
+        renderActionLinks(data);
+
+        renderTimetable(data);
+
+        const qrBtn = document.getElementById('generate-qrcode-btn');
+        if (isOwnerViewing) {
+            if(tierConfig.qrCode) {
+                qrBtn.disabled = false;
+                qrBtn.querySelector('.btn-text').textContent = "Generate QR Code";
+            } else {
+                qrBtn.disabled = true;
+                qrBtn.querySelector('.btn-text').textContent = "Upgrade to Personal for QR Code";
+            }
+        } else {
+            qrBtn.disabled = true;
+            qrBtn.querySelector('.btn-text').textContent = tierConfig.qrCode ? "QR Code (Owner Only)" : "QR Code (Unavailable)";
+        }
+    
+        const topAdContainer = document.getElementById('top-ad-container');
+        const bottomAdContainer = document.getElementById('bottom-ad-container');
+        topAdContainer.innerHTML = ''; topAdContainer.classList.add('hidden');
+        bottomAdContainer.innerHTML = ''; bottomAdContainer.classList.add('hidden');
+
+        if (tierConfig.canCustomizeAds && data.adsEnabled) {
+            if (data.topAd?.imageUrl && data.topAd?.linkUrl) {
+                topAdContainer.innerHTML = `<a href="${data.topAd.linkUrl}" target="_blank" rel="noopener noreferrer nofollow"><img src="${data.topAd.imageUrl}" loading="lazy" alt="Promotional Banner"></a>`;
+                topAdContainer.classList.remove('hidden');
+            }
+            if (data.bottomAd?.text && data.bottomAd?.linkUrl) {
+                bottomAdContainer.innerHTML = `<a href="${data.bottomAd.linkUrl}" target="_blank" rel="noopener noreferrer nofollow">${data.bottomAd.text}</a>`;
+                bottomAdContainer.classList.remove('hidden');
+            }
+        }
+        
+        const promoTop = document.getElementById('create-hap-promo-top');
+        const promoBottom = document.getElementById('create-hap-promo-bottom');
+        promoTop.innerHTML = ''; promoTop.classList.add('hidden');
+        promoBottom.innerHTML = ''; promoBottom.classList.add('hidden');
+
+        const topPromoHTML = isOwnerViewing
+            ? `<div><h3>Like this status page?</h3><p>Example ad shown to visitors.</p></div><p style="font-style: italic; margin:0;">Preview</p>`
+            : `<div><h3>Like this status page?</h3><p>Create your own in seconds!</p></div><button class="btn" id="promo-action-btn-top">Get Started</button>`;
+
+        const bottomPromoHTML = isOwnerViewing
+            ? `<h3 style="text-align: center;">Platform Promotion Preview</h3><p style="text-align: center;">This is an example of the ad visitors will see at the bottom of your profile.</p>`
+            : `<h3 style="text-align: center;">Like this status page?</h3><p style="text-align: center;">Create your own real-time availability profile in seconds!</p><div style="display: flex; justify-content: center; margin-top: 15px;"><button class="btn" id="promo-action-btn-bottom" style="flex: 0 1 250px;">Get Started Now</button></div>`;
+
+        let platformAdPosition = 'off';
+        if(tier === 'Member') {
+            platformAdPosition = 'both';
+        } else if (tier === 'Plus' || tier === 'Pro') {
+            platformAdPosition = 'bottom';
+        } else if (tierConfig.canControlPlatformAd) {
+            platformAdPosition = data.platformAdDisplay || 'off';
+        }
+        
+        if (platformAdPosition === 'top' || platformAdPosition === 'both') {
+            promoTop.innerHTML = topPromoHTML;
+            promoTop.classList.remove('hidden');
+            if (!isOwnerViewing) {
+                const btn = promoTop.querySelector('#promo-action-btn-top');
+                if(btn) btn.onclick = () => {
+                    const cleanUrl = window.location.origin + window.location.pathname;
+                    window.location.href = cleanUrl;
+                };
+            }
+        }
+        if (platformAdPosition === 'bottom' || platformAdPosition === 'both') {
+            promoBottom.innerHTML = bottomPromoHTML;
+            promoBottom.classList.remove('hidden');
+            if (!isOwnerViewing) {
+                const btn = promoBottom.querySelector('#promo-action-btn-bottom');
+                if(btn) btn.onclick = () => {
+                    const cleanUrl = window.location.origin + window.location.pathname;
+                    window.location.href = cleanUrl;
+                };
+            }
+        }
+    }
+    
+    function renderPersonalDetails(data) {
+    const container = document.getElementById('personal-details-list');
+    if (!container) return;
+    let detailsHtml = '';
+    const addDetail = (label, value) => {
+    if (value) detailsHtml += `<div class="personal-detail-item"><strong>${label}:</strong> ${value}</div>`;
+    };
+    
+    if (data.countryCode) {
+    const country = COUNTRY_LIST.find(c => c.code === data.countryCode);
+    if (country) {
+    detailsHtml += `<div class="personal-detail-item profile-country"><span class="flag-emoji">${getCountryFlagEmoji(country.code)}</span> ${country.name}</div>`;
+    }
+    }
+    addDetail('Bio', data.bio);
+    
+    const isOwnerViewing = App.currentUser && App.currentUser.userId === data.userId;
+    if (!isPublicView || isOwnerViewing) {
+    addDetail('Phone', data.phone ? `<a href="tel:${data.phone}">${data.phone}</a>` : null);
+    addDetail('Email', data.email ? `<a href="mailto:${data.email}">${data.email}</a>` : null);
+    }
+    container.innerHTML = detailsHtml || '<p class="muted">No public details shared.</p>';
+    }
+    
+    function renderCustomLinks(links, container, tierConfig) {
+    if (!container || !tierConfig) return;
+    container.innerHTML = '';
+    const validLinks = links ? links.filter(l => l && l.url && l.label) : [];
+    if (validLinks.length === 0) {
+    container.innerHTML = '<p class="muted">No links provided.</p>';
+    return;
+    }
+    let html = '';
+    validLinks.slice(0, tierConfig.linkLimit).forEach(link => {
+    html += `<a href="${link.url}" target="_blank" rel="noopener noreferrer" class="custom-link"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"></path></svg><span>${link.label}</span></a>`;
+    });
+    container.innerHTML = html;
+    }
+    
+    function renderActionLinks(data) {
+    const container = document.getElementById('profile-action-links');
+    if (!container) return;
+    container.innerHTML = '';
+    let html = '';
+    if (data.schedulingLink) html += `<a href="${data.schedulingLink}" target="_blank" rel="noopener noreferrer" class="btn secondary" style="max-width: 250px;">Book a Meeting</a>`;
+    container.innerHTML = html;
+    }
+    
+    function populateSettings(data) {
+        if (!data || !document.getElementById('display-name')) return;
+        const tier = data.membershipTier || 'Member';
+        const tierConfig = USER_TIER_CONFIG[tier] || USER_TIER_CONFIG['Member'];
+
+        document.getElementById('display-name').value = data.displayName || '';
+        document.getElementById('themeSelect').value = data.theme || 'auto';
+        document.getElementById('pfp-url').value = data.pfpUrl || '';
+        document.getElementById('display-font').value = data.displayNameFont || 'Inter, sans-serif';
+        document.getElementById('accent-color').value = data.profileAccentColor || '#0ea5e9';
+        document.getElementById('link-text-color').value = data.linkTextColor || '#0369a1';
+        document.getElementById('scheduling-link').value = data.schedulingLink || '';
+        document.getElementById('bio').value = data.bio || '';
+        document.getElementById('birthday').value = data.birthday || '';
+        document.getElementById('phone-number').value = data.phone || '';
+        
+        const countrySearch = document.getElementById('country-search'), countryCodeInput = document.getElementById('country-code');
+        if(data.countryCode) {
+            const country = COUNTRY_LIST.find(c => c.code === data.countryCode);
+            if (country) { countrySearch.value = `${getCountryFlagEmoji(country.code)} ${country.name}`; countryCodeInput.value = country.code; }
+        } else { countrySearch.value = ''; countryCodeInput.value = ''; }
+
+        document.getElementById('pfp-url-group').classList.toggle('hidden', !tierConfig.pfp);
+        document.getElementById('font-customization-field').classList.toggle('hidden', !tierConfig.customFont);
+        document.getElementById('scheduling-link-field').classList.toggle('hidden', !tierConfig.scheduling);
+        document.getElementById('accent-color-field').classList.toggle('hidden', !tierConfig.customColor);
+        document.getElementById('link-text-color-field').classList.toggle('hidden', !tierConfig.customColor);
+        
+        const linksContainer = document.getElementById('custom-links-container');
+        linksContainer.innerHTML = '';
+        const linkLimit = tierConfig.linkLimit;
+        for (let i = 0; i < linkLimit; i++) {
+            const link = data.links ? data.links[i] : null;
+            linksContainer.innerHTML += `<div class="link-group"><input type="text" id="link-label-${i}" placeholder="Link Label ${i + 1}" value="${link?.label || ''}"><input type="url" id="link-url-${i}" placeholder="URL (https://...)" value="${link?.url || ''}"></div>`;
+        }
+        if (tier !== 'Max' && tier !== 'Owner') {
+            linksContainer.innerHTML += `<p class="muted">Upgrade your tier to add more links!</p>`;
+        }
+
+        document.getElementById('status-emoji').value = data.status || '🟢';
+        document.getElementById('status-message').value = data.message || '';
+        renderVerificationSettings(data);
+
+        const integrationsCard = document.getElementById('integrations-card');
+        integrationsCard.classList.toggle('hidden', !tierConfig.gcalIntegration);
+        if (tierConfig.gcalIntegration) {
+            const isGcalConnected = !!data.googleRefreshToken;
+            document.getElementById('connect-gcal-btn').classList.toggle('hidden', isGcalConnected);
+            document.getElementById('disconnect-gcal-btn').classList.toggle('hidden', !isGcalConnected);
+            document.getElementById('gcal-customization-fields').classList.toggle('hidden', !isGcalConnected);
+            
+            const gcalStatusText = document.getElementById('gcal-status-text');
+            gcalStatusText.textContent = isGcalConnected ? "✅ Connected! Your status will sync automatically from your calendar." : "Connect to sync your status from your calendar events.";
+            
+            if(isGcalConnected) {
+                const busySelect = document.getElementById('gcal-busy-status');
+                const freeSelect = document.getElementById('gcal-free-status');
+                const statusOptions = Array.from(document.getElementById('status-emoji').options).map(opt => `<option value="${opt.value}">${opt.textContent}</option>`).join('');
+                busySelect.innerHTML = statusOptions;
+                freeSelect.innerHTML = statusOptions;
+                busySelect.value = data.gcalSettings?.busyStatus || '💻';
+                freeSelect.value = data.gcalSettings?.freeStatus || '🟢';
+            }
+        }
+
+        const customAdCard = document.getElementById('custom-ads-settings-card');
+        customAdCard.classList.toggle('hidden', !tierConfig.canCustomizeAds);
+        if (tierConfig.canCustomizeAds) {
+            const adToggle = document.getElementById('ads-enabled-toggle');
+            const adFields = document.getElementById('ad-customization-fields');
+            adToggle.value = data.adsEnabled ? 'true' : 'false';
+            adFields.classList.toggle('hidden', !data.adsEnabled);
+            document.getElementById('top-ad-image-url').value = data.topAd?.imageUrl || '';
+            document.getElementById('top-ad-link-url').value = data.topAd?.linkUrl || '';
+            document.getElementById('bottom-ad-text').value = data.bottomAd?.text || '';
+            document.getElementById('bottom-ad-link-url').value = data.bottomAd?.linkUrl || '';
+            adToggle.onchange = () => adFields.classList.toggle('hidden', adToggle.value !== 'true');
+        }
+        
+        const platformAdCard = document.getElementById('platform-ad-settings-card');
+        platformAdCard.classList.toggle('hidden', !tierConfig.canControlPlatformAd);
+        if(tierConfig.canControlPlatformAd) {
+            document.getElementById('platform-ad-toggle').value = data.platformAdDisplay || 'off';
+        }
+    }
+    
+    function handlePageLoad() {
+        window.addEventListener('hashchange', hashChangeRouter);
+        addEventListeners();
+        handleOAuthCallback();
+        
+        const lazyImageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const lazyImage = entry.target;
+                    const src = lazyImage.getAttribute('data-src');
+                    if (src) {
+                        lazyImage.style.backgroundImage = `url(${src})`;
+                    }
+                    observer.unobserve(lazyImage);
+                }
+            });
+        });
+        const pfpElement = document.getElementById('profile-pfp');
+        if(pfpElement) lazyImageObserver.observe(pfpElement);
+    }
+    
+    async function handleDeleteAccount() {
+    if (!App.currentUser) return;
+    const confirmation = window.prompt("Type 'DELETE' to confirm permanent account deletion.");
+    if (confirmation !== 'DELETE') return showToast("Account deletion cancelled.");
+    
+    const accountId = App.currentUser.userId;
+    const account = auth.currentUser;
+    if (!account) return showToast("Error: No authenticated user found.", "error");
+    
+    try {
+    await set(ref(db, `users/${accountId}`), null);
+    await set(ref(db, `history/${accountId}`), null);
+    await set(ref(db, `analytics/${accountId}`), null);
+    await set(ref(db, `calendar_events/${accountId}`), null);
+    await set(ref(db, `gcal_auth_codes/${accountId}`), null);
+    await deleteUser(account);
+    showToast("Account successfully deleted. 👋");
+    } catch (error) {
+    console.error("Account Deletion Error:", error);
+    if (error.code === 'auth/requires-recent-login') {
+    showToast("Security Alert: Please log in again to confirm this action.", "error");
+    handleLogout(); 
+    } else {
+    showToast(`Deletion failed: ${error.message}`, "error");
+    }
+    }
+    }
+    
+    async function handleSaveSettings() {
+        const saveBtn = document.getElementById('save-settings-btn');
+        saveBtn.classList.add('btn-loading');
+
+        const tier = App.currentProfileData.membershipTier || 'Member';
+        const tierConfig = USER_TIER_CONFIG[tier];
+        const linkLimit = tierConfig.linkLimit || 1;
+        const customLinks = [];
+        for (let i = 0; i < linkLimit; i++) {
+            const label = document.getElementById(`link-label-${i}`)?.value.trim();
+            const url = document.getElementById(`link-url-${i}`)?.value.trim();
+            if (label && url) { customLinks.push({ label, url }); }
+        }
+
+        const dataToSave = {
+            displayName: document.getElementById('display-name').value, 
+            theme: document.getElementById('themeSelect').value,
+            pfpUrl: document.getElementById('pfp-url').value,
+            displayNameFont: document.getElementById('display-font').value,
+            profileAccentColor: document.getElementById('accent-color').value, 
+            linkTextColor: document.getElementById('link-text-color').value,
+            schedulingLink: document.getElementById('scheduling-link').value, 
+            bio: document.getElementById('bio').value,
+            birthday: document.getElementById('birthday').value,
+            countryCode: document.getElementById('country-code').value,
+            phone: document.getElementById('phone-number').value,
+            status: document.getElementById('status-emoji').value,
+            message: document.getElementById('status-message').value,
+            links: customLinks
+        };
+        if(!dataToSave.pfpUrl) dataToSave.pfpText = App.currentProfileData.displayName.charAt(0).toUpperCase();
+
+        if(tierConfig.gcalIntegration) {
+            dataToSave.gcalSettings = {
+                busyStatus: document.getElementById('gcal-busy-status').value,
+                freeStatus: document.getElementById('gcal-free-status').value
+            };
+        }
+
+        if (tierConfig.canCustomizeAds) {
+            dataToSave.adsEnabled = document.getElementById('ads-enabled-toggle').value === 'true';
+            dataToSave.topAd = {
+                imageUrl: document.getElementById('top-ad-image-url').value.trim(),
+                linkUrl: document.getElementById('top-ad-link-url').value.trim()
+            };
+            dataToSave.bottomAd = {
+                text: document.getElementById('bottom-ad-text').value.trim(),
+                linkUrl: document.getElementById('bottom-ad-link-url').value.trim()
+            };
+        }
+        
+        if(tierConfig.canControlPlatformAd) {
+            dataToSave.platformAdDisplay = document.getElementById('platform-ad-toggle').value;
+        }
+
+        try {
+            await saveAndLogStatus(dataToSave); 
+        } catch (error) {
+            console.error("Save settings error:", error);
+            showToast("Failed to save settings.", "error");
+        } finally {
+            saveBtn.classList.remove('btn-loading');
+        }
+    }
+    
+    async function handleGenerateQrCode() {
+        const profileId = App.currentUser?.userId;
+        if (!profileId) return;
+
+        const img = document.getElementById('profile-qrcode-img');
+        const placeholder = document.getElementById('qrcode-placeholder');
+        const btn = document.getElementById('generate-qrcode-btn');
+
+        btn.disabled = true;
+        btn.classList.add('btn-loading');
+        placeholder.classList.add('hidden');
+        img.style.display = 'none';
+
+        const shareUrl = `${window.location.origin}${window.location.pathname}?user=${profileId}`;
+        
+        try {
+            const isDarkTheme = document.body.classList.contains('dark');
+            const qrDarkColor = getComputedStyle(document.documentElement).getPropertyValue('--text').trim();
+
+            const dataUrl = await QRCode.toDataURL(shareUrl, {
+                errorCorrectionLevel: 'H',
+                type: 'image/webp',
+                margin: 2,
+                width: 200,
+                color: {
+                    dark: qrDarkColor,
+                    light: '#00000000' // Transparent background
+                }
+            });
+
+            img.src = dataUrl;
+            img.style.display = 'block';
+            showToast('QR Code generated! 🖼️');
+            btn.querySelector('.btn-text').textContent = 'Re-generate QR Code';
+        } catch (err) {
+            console.error('QR Code generation failed:', err);
+            showToast('Failed to generate QR code.', 'error');
+            placeholder.classList.remove('hidden');
+            placeholder.textContent = 'Error generating QR. Please try again.';
+            btn.querySelector('.btn-text').textContent = 'Generate QR Code';
+        } finally {
+            btn.disabled = false;
+            btn.classList.remove('btn-loading');
+        }
+    }
+    
+    function handleShareStatus() {
+        const profileId = isPublicView ? new URLSearchParams(window.location.search).get('user') : App.currentUser.userId;
+        if (!profileId) return;
+        
+        const shareUrl = `${window.location.origin}${window.location.pathname}?user=${profileId}&ref=${profileId}`;
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            showToast('Profile link copied to clipboard! 🔗');
+            if (App.currentUser && App.currentUser.userId === profileId && !App.currentProfileData.achievements.firstShare) {
+                update(ref(db, `users/${profileId}/achievements`), { firstShare: 1 });
+            }
+        });
+    }
+    
+    async function fetchAndRenderAnalytics() {
+        if (!App.currentUser) return;
+        const userId = App.currentUser.userId;
+        const userTier = App.currentProfileData.membershipTier || 'Member';
+
+        const historyLog = document.getElementById('history-log');
+        historyLog.innerHTML = '<p class="muted">Loading history...</p>';
+        try {
+            const historyQuery = query(ref(db, `history/${userId}`), orderByKey(), limitToLast(10));
+            const snapshot = await get(historyQuery);
+            const historyData = snapshot.val();
+            if (historyData) {
+                historyLog.innerHTML = Object.values(historyData)
+                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                    .map(item => {
+                        const date = new Date(item.timestamp);
+                        return `<div class="history-item"><span class="history-status">${item.status} ${item.message || ''}</span><span class="history-time">${date.toLocaleTimeString()} - ${date.toLocaleDateString()}</span></div>`;
+                    }).join('');
+            } else {
+                historyLog.innerHTML = '<p class="muted">No status history found.</p>';
+            }
+        } catch (error) {
+            historyLog.innerHTML = '<p class="muted">Error loading history.</p>';
+            console.error("History fetch error:", error);
+        }
+
+        document.getElementById('views-total').textContent = App.currentProfileData.achievements?.views || 0;
+
+        if (userTier === 'Member') {
+            document.getElementById('views-unique').textContent = '🔒';
+            document.getElementById('views-today').textContent = '🔒';
+            document.getElementById('views-week').textContent = '🔒';
+            document.getElementById('analytics-chart-card').classList.add('hidden');
+            document.getElementById('analytics-country-card').classList.add('hidden');
+            document.getElementById('analytics-upgrade-prompt').classList.remove('hidden');
+            return;
+        }
+        
+        document.getElementById('analytics-chart-card').classList.remove('hidden');
+        document.getElementById('analytics-country-card').classList.remove('hidden');
+        document.getElementById('analytics-upgrade-prompt').classList.add('hidden');
+
+        try {
+            const analyticsSnap = await get(ref(db, `analytics/${userId}`));
+            const analyticsData = analyticsSnap.val() || {};
+            const dailyViews = analyticsData.viewsByDay || {};
+            const countryViews = analyticsData.viewsByCountry || {};
+            
+            let todayViews = 0, weekViews = 0;
+            const uniqueVisitors = new Set();
+            const weeklyTrendData = Array(7).fill(0);
+            const today = new Date();
+
+            for (let i = 0; i < 30; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                const dateString = date.toISOString().split('T')[0];
+                const dayData = dailyViews[dateString];
+
+                if (dayData) {
+                    const dailyVisitorIds = Object.keys(dayData);
+                    const viewCount = dailyVisitorIds.length;
+                    
+                    if (i === 0) todayViews = viewCount;
+                    if (i < 7) {
+                        weekViews += viewCount;
+                        weeklyTrendData[6 - i] = viewCount;
+                    }
+
+                    dailyVisitorIds.forEach(id => uniqueVisitors.add(id));
+                }
+            }
+            
+            document.getElementById('views-today').textContent = todayViews;
+            document.getElementById('views-week').textContent = weekViews;
+            document.getElementById('views-unique').textContent = uniqueVisitors.size;
+
+            const countryListEl = document.getElementById('country-stats-list');
+            const sortedCountries = Object.entries(countryViews).sort((a, b) => b[1] - a[1]);
+            if (sortedCountries.length > 0) {
+                countryListEl.innerHTML = sortedCountries.map(([code, count]) => {
+                    const countryName = COUNTRY_LIST.find(c => c.code === code)?.name || 'Unknown';
+                    return `<div class="country-stat-item"><span>${getCountryFlagEmoji(code)} ${countryName}</span> <strong>${count}</strong></div>`;
+                }).join('');
+            } else {
+                countryListEl.innerHTML = '<p class="muted">No country data available yet.</p>';
+            }
+
+            const chartContainer = document.getElementById('views-chart-container');
+            const maxView = Math.max(...weeklyTrendData, 1);
+            chartContainer.innerHTML = weeklyTrendData.map((count, i) => {
+                const date = new Date();
+                date.setDate(today.getDate() - (6 - i));
+                const dayInitial = date.toLocaleDateString('en-US', { weekday: 'short' }).charAt(0);
+                const heightPercent = (count / maxView) * 100;
+                return `<div class="chart-bar-wrapper">
+                            <div class="metric-value" style="font-size: 1rem; height: 20px;">${count}</div>
+                            <div class="chart-bar" style="height: ${heightPercent}%;"></div>
+                            <div class="chart-label">${dayInitial}</div>
+                        </div>`;
+            }).join('');
+
+        } catch(e) {
+            console.error("Error fetching advanced analytics:", e);
+            showToast("Could not load detailed analytics.", "error");
+        }
+    }
+    
+    async function handleSearchUsers() {
+        const queryText = document.getElementById('user-search-input').value.toLowerCase().trim();
+        const resultsList = document.getElementById('search-results-list');
+        resultsList.innerHTML = '<p class="muted">Searching...</p>';
+        try {
+            const usersSnap = await get(ref(db, 'users'));
+            const allUsers = usersSnap.val() || {};
+            let results = [];
+            for (const userId in allUsers) {
+                const user = allUsers[userId];
+                if (user.displayName && (!queryText || user.displayName.toLowerCase().includes(queryText))) {
+                    results.push({ id: userId, ...user });
+                }
+            }
+            
+            const rank = { 'Owner': 0, 'Max': 1, 'Pro': 2, 'Plus': 3, 'Member': 4 };
+            results.sort((a, b) => {
+                const tierA = a.membershipTier || 'Member';
+                const tierB = b.membershipTier || 'Member';
+                const rankA = rank[tierA] ?? 4;
+                const rankB = rank[tierB] ?? 4;
+                if (rankA !== rankB) {
+                    return rankA - rankB;
+                }
+                return (a.displayName || '').localeCompare(b.displayName || '');
+            });
+
+            if (results.length > 0) {
+                resultsList.innerHTML = results.map(item => {
+                    const userVerifiedIcon = `<svg class="inline-verified-icon" style="width:20px; height:20px;" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.06-1.06l-3.103 3.103-1.53-1.53a.75.75 0 0 0-1.06 1.06l2.06 2.06a.75.75 0 0 0 1.06 0l3.64-3.64Z" clip-rule="evenodd" /></svg>`;
+                    const tierName = item.membershipTier || 'Member';
+                    const tierClass = tierName;
+                    const verifiedTick = item.verified ? userVerifiedIcon : '';
+                    return `<div class="search-result-item"><div><div style="display: flex; align-items: center;"><strong style="font-size: 1.1rem;">${item.displayName}</strong>${verifiedTick}</div><div style="display:flex; gap: 8px; margin-top: 4px;"><div class="membership-badge tier-${tierClass}" style="font-size: 0.7rem; padding: 2px 8px;">${USER_TIER_CONFIG[tierName]?.name || tierName}</div><span style="font-size: 0.9rem; color: var(--muted);">${item.status} ${item.message || ''}</span></div></div><a href="?user=${item.id}" rel="noopener noreferrer" class="btn secondary" style="padding: 8px 12px; width: auto; font-size: 0.9rem;">View</a></div>`;
+                }).join('');
+            } else { 
+                resultsList.innerHTML = '<p class="muted">No results found.</p>'; 
+            }
+        } catch(e) { 
+            resultsList.innerHTML = '<p class="muted">Error performing search.</p>'; 
+            console.error(e);
+        }
+    }
+    
+    async function trackProfileView(profileId) {
+        try {
+            let visitorId = localStorage.getItem('hapVisitorId');
+            if (!visitorId) {
+                visitorId = 'visitor_' + Date.now() + Math.random().toString(36).substring(2, 15);
+                localStorage.setItem('hapVisitorId', visitorId);
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            const viewRef = ref(db, `analytics/${profileId}/viewsByDay/${today}/${visitorId}`);
+            const snapshot = await get(viewRef);
+
+            if (!snapshot.exists()) {
+                await set(viewRef, true);
+                
+                const totalViewsRef = ref(db, `users/${profileId}/achievements/views`);
+                const totalViewsSnap = await get(totalViewsRef);
+                await set(totalViewsRef, (totalViewsSnap.val() || 0) + 1);
+
+                try {
+                    const geoResponse = await fetch('https://ipapi.co/json/');
+                    if (geoResponse.ok) {
+                        const geoData = await geoResponse.json();
+                        const countryCode = geoData.country_code || 'XX';
+                        const countryRef = ref(db, `analytics/${profileId}/viewsByCountry/${countryCode}`);
+                        const countrySnap = await get(countryRef);
+                        await set(countryRef, (countrySnap.val() || 0) + 1);
+                    }
+                } catch (geoError) {
+                    console.warn("Could not fetch geolocation data:", geoError);
+                }
+            }
+        } catch (error) {
+            console.error("Failed to track profile view:", error);
+        }
+    }
+    
+    function filterCountries(inputId, dropdownId) {
+    const searchTerm = document.getElementById(inputId).value.toLowerCase();
+    const dropdown = document.getElementById(dropdownId);
+    dropdown.innerHTML = '';
+    COUNTRY_LIST.filter(c => c.name.toLowerCase().includes(searchTerm)).slice(0, 50).forEach(country => {
+    const option = document.createElement('div');
+    option.className = 'country-option';
+    option.innerHTML = `<span class="flag-emoji">${getCountryFlagEmoji(country.code)}</span> <span>${country.name}</span>`;
+    option.onclick = () => {
+    document.getElementById(inputId).value = `${getCountryFlagEmoji(country.code)} ${country.name}`;
+    document.getElementById(inputId.replace('-search', '-code')).value = country.code;
+    dropdown.classList.add('hidden');
+    };
+    dropdown.appendChild(option);
+    });
+    }
+    
+    async function updateMembershipTier(userId, userData, oldTier) {
+        const currentTier = userData.membershipTier;
+        if (currentTier === 'Owner') return;
+
+        const achievements = userData.achievements || {};
+        const check = (reqs) => reqs.every(req => (achievements[req.id] || 0) >= req.goal);
+        
+        let newTier = currentTier;
+        if (currentTier === 'Member' && check(ACHIEVEMENT_CONFIG.toPlus)) {
+            newTier = 'Plus';
+        }
+        if (currentTier === 'Plus' && check(ACHIEVEMENT_CONFIG.toPro)) {
+            newTier = 'Pro';
+        }
+        if (currentTier === 'Pro' && check(ACHIEVEMENT_CONFIG.toMax)) {
+            newTier = 'Max';
+        }
+
+        if (newTier !== oldTier) {
+            await update(ref(db, `users/${userId}`), { membershipTier: newTier });
+            if(userId === App.currentUser?.userId) {
+                showTierUpgradeAnimation(oldTier, newTier);
+            }
+        }
+    }
+    
+    function showTierUpgradeAnimation(oldTier, newTier) {
+        const oldFeatures = USER_TIER_CONFIG[oldTier];
+        const newFeatures = USER_TIER_CONFIG[newTier];
+        const unlockedFeatures = [];
+
+        for (const key in newFeatures) {
+            if (newFeatures[key] && !oldFeatures[key]) {
+                if (FEATURE_FRIENDLY_NAMES[key]) {
+                    unlockedFeatures.push(FEATURE_FRIENDLY_NAMES[key]);
+                }
+            }
+        }
+
+        const modal = document.getElementById('tier-upgrade-modal');
+        document.getElementById('new-tier-name').textContent = newFeatures.name;
+        const featuresList = document.getElementById('unlocked-features-list');
+        featuresList.innerHTML = unlockedFeatures.map((feature, i) => 
+            `<div class="unlocked-feature" style="animation-delay: ${i * 0.1}s">${feature}</div>`
+        ).join('');
+
+        modal.classList.add('show');
+    }
+    
+    function renderVerificationSettings(data) {
+    const container = document.getElementById('verification-section');
+    container.classList.toggle('hidden', data.membershipTier === 'Member' || data.membershipTier === 'Plus');
+    let html = `<h3>Verification ✔️</h3>`;
+    const tierConfig = USER_TIER_CONFIG[data.membershipTier];
+    
+    if (data.verified) {
+    html += `<p style="color: green; font-weight: bold;">This account is officially verified.</p>`;
+    } else if (data.verificationRequested) {
+    html += `<p style="color: orange;">Your verification request is pending review.</p>`;
+    } else if (tierConfig?.verification) {
+    html += `<p>You are eligible to apply for verification.</p><button id="request-verification-btn" class="btn secondary">Apply for Verification</button>`;
+    }
+    container.innerHTML = html;
+    container.querySelector('#request-verification-btn')?.addEventListener('click', handleRequestVerification);
+    }
+    
+    async function handleRequestVerification() {
+    const answers = {};
+    for (let i = 0; i < VERIFICATION_QUESTIONS.length; i++) {
+    const answer = prompt(`${VERIFICATION_QUESTIONS[i]} (${i+1}/${VERIFICATION_QUESTIONS.length})`);
+    if (answer === null) {
+    showToast("Verification application cancelled.");
+    return;
+    }
+    answers[`q${i+1}`] = answer;
+    }
+    
+    const confirmation = window.prompt("Type 'SUBMIT' to confirm your verification request.");
+    if (confirmation === 'SUBMIT') {
+    const updates = { verificationRequested: true, verificationAnswers: answers };
+    await update(ref(db, `users/${App.currentUser.userId}`), updates);
+    showToast("Verification request submitted!");
+    const currentData = { ...App.currentProfileData, ...updates };
+    renderVerificationSettings(currentData);
+    } else {
+    showToast("Verification cancelled.");
+    }
+    }
+    
+    function renderTiersPage() {
+        const detailsContainer = document.getElementById('my-plan-details');
+        const progressContainer = document.getElementById('my-plan-progress');
+        const allTiersContainer = document.getElementById('all-tiers-info');
+        if (!App.currentProfileData) return;
+
+        const tier = App.currentProfileData.membershipTier || 'Member';
+        const achievements = App.currentProfileData.achievements || {};
+        detailsContainer.innerHTML = `<h3>Current Tier: <span style="color: var(--primary);">${USER_TIER_CONFIG[tier].name}</span></h3><p>You unlock new perks by completing achievements and engaging with the platform.</p>`;
+
+        let nextTierKey, requirements;
+        if (tier === 'Member') { nextTierKey = 'Plus'; requirements = ACHIEVEMENT_CONFIG.toPlus; }
+        else if (tier === 'Plus') { nextTierKey = 'Pro'; requirements = ACHIEVEMENT_CONFIG.toPro; }
+        else if (tier === 'Pro') { nextTierKey = 'Max'; requirements = ACHIEVEMENT_CONFIG.toMax; }
+        else {
+        progressContainer.innerHTML = '<h2>You have reached the highest public tier! 🚀</h2><p>Thank you for being a power user!</p>';
+        }
+
+        if (nextTierKey && requirements) {
+        let progressHtml = `<h2>Progress to ${USER_TIER_CONFIG[nextTierKey].name}</h2>`;
+        let allGoalsMet = true;
+        requirements.forEach(req => {
+        let currentValue = achievements[req.id] || 0;
+        if(currentValue < req.goal) allGoalsMet = false;
+        const progress = Math.min((currentValue / req.goal) * 100, 100);
+        progressHtml += `<div class="achievement-item"><strong>${req.label} (${currentValue} / ${req.goal})</strong><div class="achievement-progress"><div class="progress-bar" style="width: ${progress}%; background-color: ${progress >= 100 ? '#22c55e' : 'var(--primary)'};"></div></div></div>`;
+        });
+        
+        if (allGoalsMet) {
+        progressHtml += `<button id="level-up-btn" class="btn" style="margin-top: 20px;">Claim Your Promotion to ${USER_TIER_CONFIG[nextTierKey].name}!</button>`;
+        }
+        progressContainer.innerHTML = progressHtml;
+        document.getElementById('level-up-btn')?.addEventListener('click', async () => {
+            await updateMembershipTier(App.currentUser.userId, App.currentProfileData, App.currentProfileData.membershipTier);
+            const finalSnapshot = await get(ref(db, `users/${App.currentUser.userId}`));
+            App.currentProfileData = { ...finalSnapshot.val(), userId: App.currentUser.userId };
+            renderTiersPage();
+        });
+        }
+
+        let allTiersHtml = '<div class="tier-plan-grid">';
+        for (const tierKey of ['Member', 'Plus', 'Pro', 'Max']) {
+            const config = USER_TIER_CONFIG[tierKey];
+            let analyticsText = 'No Analytics';
+            if (config.analytics === 'limited') analyticsText = 'Limited Analytics';
+            else if (config.analytics === true) analyticsText = 'Full Profile Analytics';
+            
+            allTiersHtml += `<div class="tier-plan-card"><h3><div class="membership-badge tier-${tierKey}">${config.name}</div></h3><ul><li>${config.linkLimit} Custom Link${config.linkLimit > 1 ? 's' : ''}</li><li>${config.gcalIntegration ? 'Google Calendar Sync' : 'No Calendar Sync'}</li><li>${config.pfp ? 'Custom Profile Picture' : 'Default Profile Picture'}</li><li>${config.qrCode ? 'Profile QR Code Sharing' : 'No QR Code Sharing'}</li><li>${config.customFont ? 'Custom Profile Font' : 'Standard Font'}</li><li>${config.customColor ? 'Custom Profile Colors' : 'Standard Colors'}</li><li>${config.scheduling ? 'Scheduling Link Display' : 'No Scheduling Link'}</li><li>${analyticsText}</li><li>${config.verification ? 'Verification Eligible' : 'Not Verification Eligible'}</li><li>${config.canCustomizeAds ? 'Custom Promo Blocks' : 'No Custom Blocks'}</li><li>${config.canControlPlatformAd ? 'Ad Controls' : 'Platform Ads On'}</li></ul></div>`;
+        }
+        allTiersHtml += '</div>';
+        allTiersContainer.innerHTML = allTiersHtml;
+    }
+    
+    async function renderAdminPanel() {
+    const requestsContainer = document.getElementById('admin-verification-requests');
+    const usersContainer = document.getElementById('admin-all-users');
+    requestsContainer.innerHTML = usersContainer.innerHTML = '<p class="muted">Loading...</p>';
+    
+    const usersSnap = await get(ref(db, 'users'));
+    const allUsers = usersSnap.val() || {};
+    
+    const userRequests = Object.entries(allUsers).filter(([uid, user]) => user.verificationRequested && !user.verified).map(([uid, user]) => ({type: 'User', id: uid, data: user}));
+    
+    if (userRequests.length > 0) {
+    requestsContainer.innerHTML = userRequests.map(req => {
+    let answersHtml = '';
+    if (req.data?.verificationAnswers) {
+    answersHtml = Object.entries(req.data.verificationAnswers).map(([key, value], index) => `<p><strong>Q${index+1}:</strong> ${value || 'Not answered'}</p>`).join('');
+    }
+    return `<div class="verification-request-card"><p><strong>Type:</strong> ${req.type}</p><p><strong>Name:</strong> ${req.data.displayName}</p><p><strong>ID:</strong> ${req.id}</p>${answersHtml ? `<div><h4>Answers:</h4>${answersHtml}</div>` : ''}<div class="verification-actions"><button class="btn approve-verify-btn" data-id="${req.id}">Approve</button><button class="btn secondary deny-verify-btn" data-id="${req.id}">Deny</button></div></div>`}).join('');
+    } else {
+    requestsContainer.innerHTML = '<p>No active verification requests.</p>';
+    }
+    
+    usersContainer.innerHTML = `<table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Tier</th></tr></thead><tbody>${Object.entries(allUsers).map(([uid, user]) => `<tr><td><a href="?user=${uid}" target="_blank">${user.displayName}</a></td><td>${user.email}</td><td><select class="admin-edit-field" data-uid="${uid}" data-field="membershipTier">${Object.keys(USER_TIER_CONFIG).map(t => `<option value="${t}" ${user.membershipTier === t ? 'selected' : ''}>${t}</option>`).join('')}</select></td></tr>`).join('')}</tbody></table>`;
+    
+    document.querySelectorAll('.approve-verify-btn, .deny-verify-btn').forEach(btn => btn.addEventListener('click', handleVerificationAction));
+    document.querySelectorAll('.admin-edit-field').forEach(sel => sel.addEventListener('change', handleAdminEdit));
+    }
+    
+    async function handleVerificationAction(e) {
+    const { id } = e.target.dataset;
+    const isApprove = e.target.classList.contains('approve-verify-btn');
+    const updates = { verified: isApprove, verificationRequested: false };
+    await update(ref(db, `users/${id}`), updates);
+    showToast(`User request ${isApprove ? 'approved' : 'denied'}.`);
+    renderAdminPanel();
+    }
+    
+    async function handleAdminEdit(e) {
+    const { uid, field } = e.target.dataset;
+    const value = e.target.value;
+    await update(ref(db, `users/${uid}`), { [field]: value });
+    showToast(`User ${field} updated.`);
+    }
+
+    function handleConnectGoogleCalendar() {
+        const clientId = "703348367691-fto8h5ngp2hm5qn5fkbfhtsh7re3pcub.apps.googleusercontent.com";
+        const redirectUri = window.location.origin + window.location.pathname;
+        const scope = 'https://www.googleapis.com/auth/calendar.events.readonly';
+        const state = App.currentUser.userId;
+        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&access_type=offline&prompt=consent&state=${state}`;
+        window.location.href = authUrl;
+    }
+
+    async function handleDisconnectGoogleCalendar() {
+        if (!App.currentUser) return;
+        const updates = {
+            googleRefreshToken: null
+        };
+        await update(ref(db, `users/${App.currentUser.userId}`), updates);
+        App.currentProfileData.googleRefreshToken = null;
+        populateSettings(App.currentProfileData);
+        renderTimetable(App.currentProfileData);
+        showToast("Google Calendar has been disconnected.");
+    }
+    
+    async function handleOAuthCallback() {
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        const state = params.get('state');
+
+        if (code && state) {
+            const cleanUrl = window.location.origin + window.location.pathname + window.location.hash;
+            history.replaceState({}, document.title, cleanUrl);
+            
+            showToast('Finalizing calendar connection...', 'info');
+
+            try {
+                // Store the auth code and set the user's token status to 'pending'
+                // A backend function would listen for this code to securely swap it for a refresh token
+                await update(ref(db, `users/${state}`), { googleRefreshToken: 'pending' });
+                await set(ref(db, `gcal_auth_codes/${state}`), code);
+                showToast('Calendar connected! A backend function is required to sync events. ✅', 'info');
+                
+                if(App.currentProfileData && App.currentProfileData.userId === state){
+                    App.currentProfileData.googleRefreshToken = 'pending';
+                    populateSettings(App.currentProfileData);
+                    renderTimetable(App.currentProfileData); // Re-render to show the new status
+                }
+
+            } catch(error) {
+                console.error("Failed to save auth code:", error);
+                showToast('Could not connect calendar. Please try again.', 'error');
+            }
+        }
+    }
+    
+    function renderTimetable(userData) {
+        const card = document.getElementById('calendar-view-card');
+        const container = document.getElementById('calendar-timetable');
+        const notice = document.getElementById('gcal-backend-notice');
+        const tierConfig = USER_TIER_CONFIG[userData.membershipTier || 'Member'];
+
+        notice.classList.add('hidden'); // Reset notice visibility
+
+        if (!tierConfig.gcalIntegration) {
+            card.classList.add('hidden');
+            return;
+        }
+
+        card.classList.remove('hidden');
+
+        if (!userData.googleRefreshToken) {
+            container.innerHTML = '<p class="muted">Connect your Google Calendar in settings to see your availability here.</p>';
+            return;
+        }
+        
+        if (userData.googleRefreshToken === 'pending') {
+            container.innerHTML = `<p class="muted" style="text-align: center;"><strong>Connection In Progress</strong><br>A backend process is required to complete the sync.</p>`;
+            notice.classList.remove('hidden');
+            return; // Stop here, don't try to listen for events
+        }
+
+        const timetableRef = ref(db, `calendar_events/${userData.userId}`);
+        timetableListener = onValue(timetableRef, (snapshot) => {
+            const eventsData = snapshot.val();
+            const busySlots = eventsData?.busySlots || [];
+            
+            let html = '<div id="timetable-grid">';
+            html += '<div></div>';
+            const today = new Date();
+            for (let i = 0; i < 7; i++) {
+                const day = new Date(today);
+                day.setDate(today.getDate() + i);
+                html += `<div class="day-header">${day.toLocaleDateString('en-US', { weekday: 'short' })}<br>${day.getDate()}</div>`;
+            }
+
+            for (let hour = 8; hour < 20; hour++) {
+                const timeStr = (hour % 12 === 0 ? 12 : hour % 12) + (hour < 12 ? 'a' : 'p');
+                html += `<div class="time-label">${timeStr}</div>`;
+
+                for (let day = 0; day < 7; day++) {
+                    const slotDate = new Date(today);
+                    slotDate.setDate(today.getDate() + day);
+                    slotDate.setHours(hour, 0, 0, 0);
+                    
+                    const isBusy = busySlots.some(slot => {
+                        const start = new Date(slot.start);
+                        const end = new Date(slot.end);
+                        return slotDate >= start && slotDate < end;
+                    });
+                    
+                    html += `<div class="time-slot ${isBusy ? 'busy' : ''}"></div>`;
+                }
+            }
+
+            html += '</div>';
+            container.innerHTML = html;
+        }, (error) => {
+            console.error("Error listening for timetable data:", error);
+            container.innerHTML = '<p class="muted">Could not load availability data.</p>';
+        });
+    }
+    
+    // NEW: Function to handle Gemini AI Sync
+    async function handleGeminiAiSync() {
+        const btn = document.getElementById('gemini-sync-btn');
+        const calendarText = document.getElementById('calendar-input-for-ai').value.trim();
+        
+        if (!calendarText) {
+            showToast("Please paste your calendar agenda first.", "error");
+            return;
+        }
+
+        btn.classList.add('btn-loading');
+
+        const timeData = getLocalTimeData();
+        const now = new Date();
+        const availableEmojis = Array.from(document.getElementById('status-emoji').options).map(o => o.value);
+        
+        const systemInstruction = `You are an intelligent status assistant. Your task is to analyze a user's calendar events for today and determine their current status.
+        - The user's current time is ${now.toLocaleTimeString()} in the ${timeData.timeZone} timezone.
+        - Analyze the provided calendar text to find the event that is happening right now.
+        - If no event is happening now, the status should be 'Available'.
+        - From the current event's title, create a short, generic status message. IMPORTANT: Remove all personal identifiable information like names, project codenames, or specific locations. For example, 'Project Phoenix Sync with Alice' should become 'In a meeting'. 'Dr. Smith Appt' should become 'On an appointment'.
+        - Based on the event title and type, choose the most appropriate emoji for the status from this list: ${availableEmojis.join(', ')}.
+        - If the user is available, use the '🟢' emoji and the message 'Available'.`;
+
+        const userPrompt = `Here is my calendar for today:\n\n${calendarText}`;
+
+        try {
+            const response = await ai.models.generateContent({
+                model: 'gemini-2.5-flash',
+                contents: userPrompt,
+                config: {
+                    systemInstruction: systemInstruction,
+                    responseMimeType: 'application/json',
+                    responseSchema: {
+                        type: Type.OBJECT,
+                        properties: {
+                            status_emoji: {
+                                type: Type.STRING,
+                                description: 'The emoji representing the current status.',
+                            },
+                            status_message: {
+                                type: Type.STRING,
+                                description: 'The generated status message, cleared of PII.',
+                            },
+                        },
+                        required: ["status_emoji", "status_message"]
+                    },
+                },
+            });
+
+            const jsonString = response.text;
+            if (jsonString) {
+                const parsedJson = JSON.parse(jsonString);
+                const { status_emoji, status_message } = parsedJson;
+                
+                if (status_emoji && status_message) {
+                    document.getElementById('status-emoji').value = status_emoji;
+                    document.getElementById('status-message').value = status_message;
+                    await handleSaveSettings();
+                    showToast("AI has updated your status!");
+                } else {
+                    throw new Error("AI response was missing required fields.");
+                }
+            } else {
+                throw new Error("No content received from Gemini API.");
+            }
+        } catch (error) {
+            console.error("Gemini AI Sync Error:", error);
+            showToast("Failed to sync with AI. Check console for details.", "error");
+        } finally {
+            btn.classList.remove('btn-loading');
+        }
+    }
+
+
+    function addEventListeners() {
+    document.querySelector('.auth-tabs')?.addEventListener('click', e => {
+    if (e.target.classList.contains('tab')) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    e.target.classList.add('active');
+    const isLogin = e.target.dataset.tab === 'login';
+    document.getElementById('login-form-container').classList.toggle('hidden', !isLogin);
+    document.getElementById('signup-form').classList.toggle('hidden', isLogin);
+    }
+    });
+    
+    document.getElementById('signup-form')?.addEventListener('submit', handleEmailSignup);
+    document.getElementById('login-form')?.addEventListener('submit', handleEmailLogin);
+    document.getElementById('google-login-btn')?.addEventListener('click', handleGoogleLogin);
+    document.getElementById('logout-btn')?.addEventListener('click', handleLogout);
+    document.getElementById('delete-account-btn')?.addEventListener('click', handleDeleteAccount);
+    document.getElementById('save-settings-btn')?.addEventListener('click', handleSaveSettings);
+    document.getElementById('share-status-btn')?.addEventListener('click', handleShareStatus);
+    document.getElementById('run-search-btn')?.addEventListener('click', handleSearchUsers);
+    document.getElementById('generate-qrcode-btn')?.addEventListener('click', handleGenerateQrCode);
+    document.getElementById('connect-gcal-btn')?.addEventListener('click', handleConnectGoogleCalendar);
+    document.getElementById('disconnect-gcal-btn')?.addEventListener('click', handleDisconnectGoogleCalendar);
+
+    // This is for the button that triggers the Gemini AI to analyze calendar events.
+    document.getElementById('gemini-sync-btn')?.addEventListener('click', handleGeminiAiSync);
+
+    // This listens for clicks on the main navigation header to switch between pages.
+    document.getElementById('mainHeader')?.addEventListener('click', (e) => {
+        if (e.target.closest('.nav-btn')) {
+            navigateTo(e.target.closest('.nav-btn').dataset.page, false);
+        }
+    });
+
+    const countrySearchInput = document.getElementById('country-search');
+    const countryDropdown = document.getElementById('country-dropdown');
+    countrySearchInput?.addEventListener('focus', () => {
+        filterCountries('country-search', 'country-dropdown');
+        countryDropdown.classList.remove('hidden');
+    });
+    countrySearchInput?.addEventListener('input', () => filterCountries('country-search', 'country-dropdown'));
+
+    // This handles the gamified tier upgrade animation.
+    document.getElementById('gift-box-icon')?.addEventListener('click', (e) => {
+        e.target.classList.add('unboxing');
+        setTimeout(() => {
+            document.getElementById('upgrade-gift-stage').style.display = 'none';
+            document.getElementById('upgrade-results-stage').classList.add('show');
+        }, 500);
+    });
+
+    // Closes the tier upgrade modal.
+    document.getElementById('close-upgrade-modal-btn')?.addEventListener('click', () => {
+        const modal = document.getElementById('tier-upgrade-modal');
+        modal.classList.remove('show');
+        // Reset the modal for next time
+        setTimeout(() => {
+            document.getElementById('upgrade-gift-stage').style.display = 'block';
+            document.getElementById('upgrade-results-stage').classList.remove('show');
+            document.getElementById('gift-box-icon').classList.remove('unboxing');
+        }, 500);
+    });
+}
+
+// This is the final line of the script. It tells the browser to run the 
+// handlePageLoad function once the entire HTML document has been loaded.
+// This ensures that all elements are available in the DOM before any scripts try to interact with them.
+window.onload = handlePageLoad;
+
+</script>
 </body>
 </html>
-
